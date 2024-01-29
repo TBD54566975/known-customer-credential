@@ -43,15 +43,15 @@ Financial Institutions often leverage IDV Vendors to streamline the IDV process.
 Integration with IDV vendors happens in 1 of 2 ways:
 
 #### PII Collected by Vendor
-* Vendor provides an SDK that takes control of the user interface for PII collection. 
-* PII is submitted directly to the vendor's backend system 
-* Vendor notifies financial institution via webhooks requests when IDV is complete
-* financial instituion requests IDV result and PII from vendor 
+1. Vendor provides an SDK that takes control of the user interface for PII collection
+2. PII is submitted directly to the vendor's backend system
+3. Vendor notifies the PFI via webhooks requests when IDV is complete
+4. PFI requests IDV result and PII from vendor on the user's behalf
 
 
 #### PII Collected by PFI
-* PII is collected by the financial institution
-* PII is subsequently sent to the IDV vendor via the backend system for verification
+1. PII is submitted directly to the PFI's backend system
+2. PII is subsequently sent to the IDV vendor via the backend system for verification
 
 > [!IMPORTANT]
 > KCC issuance necessitates web-based IDV for reasons that are explained in this document
