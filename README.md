@@ -18,6 +18,7 @@
   - [Initiating IDV Flow](#initiating-idv-flow)
   - [IDV](#idv)
     - [Vendor Collects PII](#vendor-collects-pii)
+    - [PFI collects PII](#pfi-collects-pii)
   - [Credential Issuance](#credential-issuance)
 - [Other Considerations](#other-considerations)
 
@@ -35,22 +36,25 @@ Regulatory requirements can vary by region specifically with respect to the info
 ### Identity Verification
 IDV (Identity Verification) is a critical part of performing KYC wherein the PII (Personally Identifying Information) collected from an individual is verified using third party resources. IDV often includes steps such as document verification and liveness checks. 
 
-Financial Institutions often leverage IDV Vendors to streamline the IDV process. Integration with IDV vendors happens in 1 of 3 ways:
+Financial Institutions often leverage IDV Vendors to streamline the IDV process.
 
 ### IDV Vendor Integrations
 
-#### PII Collected by Vendor
-> [!WARNING]
-> Include Sequence Diagram where Vendor provides their own onboarding URLs
+Integration with IDV vendors happens in 1 of 2 ways:
 
-> [!WARNING]
-> Include Sequence Diagram where vendor provides an SDK that takes control of UI
+#### PII Collected by Vendor
+* Vendor provides an SDK that takes control of the user interface for PII collection. 
+* PII is submitted directly to the vendor's backend system 
+* Vendor notifies financial institution via webhooks requests when IDV is complete
+* financial instituion requests IDV result and PII from vendor 
 
 
 #### PII Collected by PFI
+* PII is collected by the financial institution
+* PII is subsequently sent to the IDV vendor via the backend system for verification
 
-> [!WARNING]
-> Inclue Sequence Diagram where PII is collected by financial institution and sent to IDV vendor via backend system
+> [!IMPORTANT]
+> KCC issuance necessitates web-based IDV for reasons that are explained in this document
 
 # Requirements
 This body of work is an extension of the work being done for tbDEX. In effect, this proposal considers the following as requirements:
@@ -67,27 +71,31 @@ Ensuring that this is possible is essential to reduce friction or pain points fo
 This requirement is critical to the value proposition of using Verifiable Credentials within the context of KYC. Performing KYC has a non-negligible cost for financial institutions which can be drastically reduced by receiving the necessary PII in a format that has been provably verified by a trusted third party.
 
 > [!IMPORTANT]
-> A significantly hairy but equally critical aspect to consider here is scenarios wherein an individual possesses one or more "Identity Wallet" mobile applications where credentials are stored 
+> We will need to consider scenarios wherein an individual possesses one or more "Identity Wallet" mobile applications that store credentials 
 
 > [!IMPORTANT]
-> another hairy but critical aspect to consider are flows where a mobile application that is _not_ an identity wallet initiates the IDV process with a PFI
+> We will need to consider issuance _to_ and presentation _from_ identity wallets that did not initiate the flow
 
 
 ---
 
-3. **Must ensure that applications initiating KCC issuance / IDV flows for PFIs **do not** have to store, handle, relay PII through the initating application's backend systems**
+3. **Must ensure that applications initiating KCC issuance / IDV flows for PFIs **do not** have to store, handle, or relay PII through the initating application's backend systems**
 
+Necessitating that PII come in contact with an application's backend systems introduces undesired complexity for many use-cases (e.g. self-custodial wallets that wish to provide on/off-ramps to their users without owning customer relationships)
 
 ---
 
+4. **Must prevent individuals who already have a pre-existing account with a PFI from having to go through IDV again**
 
-4. **Must support scenarios wherein an individual that already has an account with the PFI (created out of band) does not have to go through IDV again**
+A PFI could be a bank that an individual already has an account with. In this scenario, The individual should be able to _log in_ to their pre-existing account via webview vs. having to go through IDV again. 
 
 ---
 
 5. **Must make use of pre-existing standards wherever possible.**
 
-There's no point in re-inventing the wheel where it's not necessary. Re-using well established pre-existing standards increases the likelihood of reducing friction for Issuers and Holders
+Interoperability is critical for the ecosystem as a whole. This is also an implied requirement  in order to leverage credentials that are already being issued/presented using pre-existing standards 
+
+---
 
 # Implementation Details
 
@@ -238,6 +246,9 @@ References:
 
 ## IDV
 
+> [!IMPORTANT]
+> Whether the PFI is utilizing an IDV vendor is entirely opaque from the originating mobile app's perspective.
+
 ### Vendor Collects PII
 ```mermaid
 sequenceDiagram
@@ -258,8 +269,7 @@ V->>W: Callback URI or 200
 W->>W: Close
 ```
 
-## Credential Issuance
-
+### PFI collects PII
 ```mermaid
 sequenceDiagram
 autonumber
@@ -268,6 +278,28 @@ actor A as Alice
 participant D as DIDPay
 participant W as Webview
 participant P as PFI
+
+
+W->>W: Load URL
+loop until 200 response
+    A->>W: Provide PII, Submit
+    W->>P: PII
+    P->>P: Process
+    P->>W: 200 or 400 with errors
+end
+W->>W: Close
+```
+
+
+## Credential Issuance
+
+```mermaid
+sequenceDiagram
+autonumber
+
+participant D as DIDPay
+participant P as PFI
+participant V as Vendor
 
 D->>P: Token Request
 P->>D: Access Token
@@ -279,6 +311,10 @@ loop until credential received
     P->>D: issuance_pending
 end
 V->>P: Webhook Request w. results
+P->>P: evaluate results and Issue Credential or Reject
+D->>P: Deferred Credential Request
+P->>D: Credential Response w/ Credential
+P->>P: Invalidate preauth code
 ```
 
 
