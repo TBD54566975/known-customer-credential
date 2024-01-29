@@ -34,7 +34,7 @@
 
 
 # Introduction
-This document proposes a standardized means for PFIs (Participating Financial Institution) to perform KYC (Know Your Customer) and issue a subsequent KCC (Known Customer Credential) on a DID (Decentralized Identifer) controlled by a retail for the purpose of providing financial services to that DID in accordance to regulatory requirements.
+This document proposes a standardized means for PFIs (Participating Financial Institution) to perform KYC (Know Your Customer) and issue a subsequent KCC (Known Customer Credential) on a DID (Decentralized Identifer) controlled by a retail customer for the purpose of providing financial services to that DID in accordance to regulatory requirements.
 
 ## Known Customer Credential
 
