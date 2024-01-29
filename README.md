@@ -152,7 +152,7 @@ The Web view is utilized to:
 
 ## Initiating IDV Flow
 
-Initiating the IDV flow is done using [SIOPv2].
+Initiating the IDV flow is done using [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html).
 
 ```mermaid
 sequenceDiagram
@@ -199,13 +199,17 @@ D->>W: Load URL in IDV Request
 | `subject_syntax_types_supported` |             |          | [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-7.5-2.1.1) |           |
 |                                  |             |          |                                                                                                         |           |
 
+> [!IMPORTANT]
+> the inclusion of `presentation_definition` as per [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-presentation_definition-par) allows for other verifiable credentials to be provided as input for IDV.
+
 References:
 * [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-openid-provider-a)
 * [OIDC Auth Request](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)
+* [OID4VP `presentation_definition` parameter](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-presentation_definition-par)
 
 ---
 
-1. Wallet verifies integrity of Auth Request and constructs an Auth Response
+4/5. Wallet verifies integrity of Auth Request and constructs an Auth Response
 
 > [!WARNING]
 > TODO: Include types for Auth Response
@@ -217,13 +221,8 @@ References:
 
 ---
 
-4. Wallet Sends Auth Response to `redirect_uri` provided in Auth Request
 
-
----
-
-
-5/6. PFI verifies integrity of AuthResponse and constructs IDV Request
+6/7. PFI verifies integrity of AuthResponse and constructs IDV Request
 
 
 > [!WARNING] 
@@ -231,17 +230,23 @@ References:
 
 
 **IDV Request**
-| field | description | required (y/n) | references | comments |
-| :---- | :---------- | :------------- | :--------- | :------- |
+| field              | description                     | required (y/n) | references                                                                                                                           | comments                                                                                       |
+| :----------------- | :------------------------------ | :------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `url`              | URL of form used to collect PII | y              |                                                                                                                                      | required for now until we figure out how to support exclusively providing credentials as input |
+| `credential_offer` |                                 | y              | [OID4VC](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#name-credential-offer-parameters) |                                                                                                |
+
+
+> [!WARNING] 
+> TODO: explain rationale behind providing `credential_offer` at this stage
 
 ---
 
-7. Wallet verifies integrity of IDV Request
+8. Wallet verifies integrity of IDV Request
 
 
 ---
 
-8. Wallet loads URL provided in IDV Request in Webview 
+9. Wallet loads URL provided in IDV Request in Webview 
 
 
 ## IDV
