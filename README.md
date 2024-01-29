@@ -218,7 +218,8 @@ References:
 5/6. PFI verifies integrity of AuthResponse and constructs IDV Request
 
 
-> [!WARNING] I don't know if we're breaking OIDC conformance here by using the response returned by RP to convey use-case specific information
+> [!WARNING] 
+> I don't know if we're breaking OIDC conformance here by using the response returned by RP to convey use-case specific information
 
 
 **IDV Request**
