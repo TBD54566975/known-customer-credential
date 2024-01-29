@@ -85,7 +85,7 @@ This requirement is critical to the value proposition of using Verifiable Creden
 
 ---
 
-1. **Must make use of pre-existing standards wherever possible.**
+5. **Must make use of pre-existing standards wherever possible.**
 
 There's no point in re-inventing the wheel where it's not necessary. Re-using well established pre-existing standards increases the likelihood of reducing friction for Issuers and Holders
 
