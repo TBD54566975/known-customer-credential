@@ -26,15 +26,18 @@
 
 
 # Introduction
-This document proposes a standardized means for PFIs (Participating Financial Institution) to perform KYC (Know Your Customer) on a DID (Decentralized Identifer) controlled by a retail customer for the purpose of providing financial services to that DID in accordance to regulatory requirements.
+This document proposes a standardized means for PFIs (Participating Financial Institutions) to perform IDV (Identity Verification) on a DID (Decentralized Identifier) controlled by a retail customer for the purpose of providing financial services to that DID in accordance to regulatory Know Your Customer requirements.
 
 ## KYC Background
-In the financial industry, KYC (Know Your Customer) is a process performed by financial institutions to collect and verify the personal information of individuals with whom they intend to establish customer relationships for the purposes of providing financial services. Performing KYC is essential to comply with regulatory requirements, ensuring that financial institutions adhere to legal standards and prevent fraud, money laundering, and other illicit activities.
+In the financial industry, KYC (Know Your Customer) is term used to describe a set of policies, procedures, and processes that financial institutions use to determine the true identity of a customer, and assess the on-going risk that a customer poses to an organization during the life-time of a customer relationship. KYC typically encompasses:
+* Customer identification and verification (IDV);
+* Understanding the nature and purpose of customer relationships to develop a customer risk profile; and
+* Ongoing monitoring for reporting suspicious transactions and, using a risk-based approach, maintaining and updating customer information. 
 
-Regulatory requirements can vary by region specifically with respect to the information that needs to be collected, how long that information needs to be retained, and how often various aspects of performing KYC need to be repeated and within a given duration (e.g. sanctions screening, re-collecting PII). 
+Regulatory KYC requirements can vary by region with respect to the information that needs to be collected, the information that needs to be validated and verified, how long that information needs to be retained, and how often various aspects of KYC need to be repeated (e.g. sanctions screening, refreshing IDV, re-collecting source of funds information). 
 
 ### Identity Verification
-IDV (Identity Verification) is a critical part of performing KYC wherein the PII (Personally Identifying Information) collected from an individual is verified using third party resources. IDV often includes steps such as document verification and liveness checks. 
+IDV (Identity Verification) is a critical component of KYC wherein the PII (Personally Identifying Information) collected from an individual is verified using third party resources. IDV often includes steps such as verification of a valid government-issued photo ID, liveness checks, and verification of user-submitted PII against authoritative databases.
 
 Financial Institutions often leverage IDV Vendors to streamline the IDV process.
 
@@ -46,7 +49,7 @@ Integration with IDV vendors happens in 1 of 2 ways:
 * Vendor provides an SDK that takes control of the user interface for PII collection. 
 * PII is submitted directly to the vendor's backend system 
 * Vendor notifies financial institution via webhooks requests when IDV is complete
-* financial instituion requests IDV result and PII from vendor 
+* Financial institution requests IDV result and PII from vendor 
 
 
 #### PII Collected by PFI
@@ -54,7 +57,7 @@ Integration with IDV vendors happens in 1 of 2 ways:
 * PII is subsequently sent to the IDV vendor via the backend system for verification
 
 > [!IMPORTANT]
-> KCC issuance necessitates web-based IDV for reasons that are explained in this document
+> Web-based IDV is necessary for reasons that are explained in this document
 
 # Requirements
 This body of work is an extension of the work being done for tbDEX. In effect, this proposal considers the following as requirements:
