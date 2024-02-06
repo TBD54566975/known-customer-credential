@@ -198,7 +198,7 @@ D->>W: Load URL in IDV Request
 | `client_id`               | The DID of the RP, which is us (the PFI)                                            | y              |                                                                                                                                                                                              |                         |
 | `scope`                   | What's being requested. 'openid' indicates ID Token is being requested              |                | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                                                                                           |                         |
 | `response_type`           | What sort of response the RP is expecting. 'id_token' indicates an ID Token         |                | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                 | MUST include `id_token` |
-| `response_uri`            | The URI to which the SIOPv2 Auth Response must be sent                              | y              | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-7.2)                                                                                                |                         |
+| `response_uri`            | The URI to which the SIOPv2 Auth Response will be sent                              | y              | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-7.2)                                                                                                |                         |
 | `response_mode`           | The mode in which the SIOPv2 Auth Response will be sent. MUST be `direct_post`      | y              | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-1)                                                                                                  |                         |
 | `presentation_definition` | Used by PFI to request VCs as input to IDV process                                  | n              | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-presentation_definition-par)                                                                               |                         |
 | `nonce`                   | A nonce which MUST be included in the ID Token provided in the SIOPv2 Auth Response |                |                                                                                                                                                                                              |                         |
@@ -219,12 +219,19 @@ D->>W: Load URL in IDV Request
 The SIOPv2 Auth Request is encoded as a URI before being returned to DIDPay, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
 
 ### SIOPv2 Auth Response
-> [!WARNING]
-> TODO: Include types for Auth Response
+
+| field              | description                | required (y/n) | references                                                                                                                           | comments                                                                                       |
+| :----------------- |:---------------------------| :------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `id_token`              | A JWT issued by the Wallet | y              |                                                                                                                                      |  |
+
 
 #### ID Token
-> [!WARNING]
-> TODO: Include details on how to construct ID token
+| field | description                                                                            | required (y/n) | references                                                                                                                           | comments                                                                                       |
+|:------|:---------------------------------------------------------------------------------------| :------------- | :----------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `iss` | Issuer. MUST match the value of `sub`                                                  | y         |                                                                                                                                      | |
+| `sub` | Subject. The DID of the customer applying for KCC                                      | y         |                                                                                                                                      | |
+| `aud` | Audience. MUST match the value of `client_id` from the SIOPv2 Auth Request (PFI's DID) | y         |                                                                                                                                      | |
+
 
 
 ### IDV Request
