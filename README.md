@@ -1,7 +1,7 @@
 # Known Customer Credential Issuance <!-- omit in toc -->
 
 <!-- TOC -->
--[Introduction](#introduction)
+- [Introduction](#introduction)
   - [KYC Background](#kyc-background)
     - [Identity Verification](#identity-verification)
     - [IDV Vendor Integrations](#idv-vendor-integrations)
@@ -22,8 +22,8 @@
       - [ID Token](#id-token)
     - [IDV Request](#idv-request)
       - [Credential Offer](#credential-offer)
-      - [Grants](#grants-)
-      - [Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized_code](#grant-type-urnietfparamsoauthgrant-typepre-authorized_code)
+      - [Grants](#grants)
+      - [Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized\_code](#grant-type-urnietfparamsoauthgrant-typepre-authorized_code)
   - [IDV](#idv)
     - [Vendor Collects PII](#vendor-collects-pii)
     - [PFI collects PII](#pfi-collects-pii)
@@ -197,7 +197,7 @@ D->>W: Load URL in IDV Request
 ### SIOPv2 Auth Request
 
 | Field                     | Description                                                                                | Required | References                                                                                                                                                                                   | Comments                                                  |
-|:--------------------------|:-------------------------------------------------------------------------------------------|:---------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------|
+| :------------------------ | :----------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
 | `client_id`               | The DID of the RP, which is us (the PFI)                                                   | y        |                                                                                                                                                                                              |                                                           |
 | `scope`                   | What's being requested. 'openid' indicates ID Token is being requested                     | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                    |                                                           |
 | `response_type`           | What sort of response the RP is expecting. MUST include `id_token`. MAY include `vp_token` | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                 |                                                           |
@@ -209,7 +209,7 @@ D->>W: Load URL in IDV Request
 
 #### Client Metadata
 | Field                            | Description                                                                                                 | Required | References                                                                                              | Comments                  |
-|:---------------------------------|:------------------------------------------------------------------------------------------------------------|:---------|:--------------------------------------------------------------------------------------------------------|:--------------------------|
+| :------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------ | :------------------------ |
 | `subject_syntax_types_supported` | Space separated list of DID methods supported for the subject of ID Token                                   | y        | [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-7.5-2.1.1) | Example `did:dht did:jwk` |
 | `client_name`                    | Human-readable string name of the client to be presented to the end-user during authorization               | n        | [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html#section-2)                                        |                           |
 | `client_uri`                     | URI of a web page providing information about the client                                                    | n        | [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html#section-2)                                        |                           |
@@ -230,15 +230,15 @@ The SIOPv2 Auth Request is encoded as a URI before being returned to DIDPay, as 
 
 ### SIOPv2 Auth Response
 
-| Field                     | Description                                                                                                                   | Required | References                                                                                                                                                     | Comments |
-|:--------------------------|:-------------------------------------------------------------------------------------------------------------------|:---------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|
+| Field                     | Description                                                                                                        | Required | References                                                                                                                                                     | Comments |
+| :------------------------ | :----------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
 | `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Auth Request                                                | y        | [JWT](https://www.rfc-editor.org/info/rfc7519) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
 | `vp_token`                | A Verifiable Presentation or an array of VPs in response to `presentation_definition`                              | n        | [OIDV4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.1-2.2)                                                                 |          |
 | `presentation_submission` | A Presentation Submission that contains mappings between the requested VC and where to find them within `vp_token` | n        | [OIDV4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.1-2.4)                                                                 |          |
 
 #### ID Token
 | Field   | Description                                                                           | Required | References | Comments |
-|:--------|:--------------------------------------------------------------------------------------|:---------|:-----------|:---------|
+| :------ | :------------------------------------------------------------------------------------ | :------- | :--------- | :------- |
 | `iss`   | Issuer MUST match the value of `sub`                                                  | y        |            |          |
 | `sub`   | Subject. The DID of the customer applying for KCC                                     | y        |            |          |
 | `aud`   | Audience MUST match the value of `client_id` from the SIOPv2 Auth Request (PFI's DID) | y        |            |          |
@@ -248,26 +248,26 @@ The SIOPv2 Auth Request is encoded as a URI before being returned to DIDPay, as 
 
 ### IDV Request
 | Field              | Description                     | Required | References                                                                                                                            | Comments                                                                                       |
-|:-------------------|:--------------------------------|:---------|:--------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------|
+| :----------------- | :------------------------------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
 | `url`              | URL of form used to collect PII | y        |                                                                                                                                       | Required for now until we figure out how to support exclusively providing credentials as input |
 | `credential_offer` |                                 | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#name-credential-offer-parameters) |                                                                                                |
 
 #### Credential Offer
 | Field                          | Description                                                                                                                                                         | Required | References                                                                                                             | Comments |
-|:-------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:-----------------------------------------------------------------------------------------------------------------------|:---------|
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------- | :--------------------------------------------------------------------------------------------------------------------- | :------- |
 | `credential_issuer`            | The URL of the Credential Issuer that the Wallet will interact with in subsequent steps                                                                             | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.1) |          |
 | `credential_configuration_ids` | Array of unique strings that each identify a credential being offered. Wallet can use these to request metadata                                                     | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.2) |          |
 | `grants`                       | Object containing Grant Types that the Credential Issuer will accept for this credential offer. MUST contain `urn:ietf:params:oauth:grant-type:pre-authorized_code` | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.3) |          |
 
 #### Grants 
 | Field                                                  | Description                                                                                      | Required | References                                                                                                               | Comments |
-|:-------------------------------------------------------|:-------------------------------------------------------------------------------------------------|:---------|:-------------------------------------------------------------------------------------------------------------------------|:---------|
+| :----------------------------------------------------- | :----------------------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------------------- | :------- |
 | `urn:ietf:params:oauth:grant-type:pre-authorized_code` | Grant Type that allows the Wallet to follow a Pre-Authorized Code Flow to collect the credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.1) |          |
 
 
 #### Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized_code
 | Field                 | Description                                                                                       | Required | References                                                                                                                 | Comments |
-|:----------------------|:--------------------------------------------------------------------------------------------------|:---------|:---------------------------------------------------------------------------------------------------------------------------|:---------|
+| :-------------------- | :------------------------------------------------------------------------------------------------ | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------- |
 | `pre-authorized_code` | The code representing the Credential Issuer's authorization for the Wallet to obtain a credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |          |
 
 > [!WARNING] 
