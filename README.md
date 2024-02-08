@@ -15,10 +15,10 @@
     - [Mobile App](#mobile-app)
     - [Web View](#web-view)
   - [Initiating IDV Flow](#initiating-idv-flow)
-    - [SIOPv2 Auth Request](#siopv2-auth-request)
+    - [SIOPv2 Authorization Request](#siopv2-authorization-request)
       - [Client Metadata](#client-metadata)
       - [URI Encoding](#uri-encoding)
-    - [SIOPv2 Auth Response](#siopv2-auth-response)
+    - [SIOPv2 Authorization Response](#siopv2-authorization-response)
       - [ID Token](#id-token)
     - [IDV Request](#idv-request)
       - [Credential Offer](#credential-offer)
@@ -112,14 +112,14 @@ Interoperability is critical for the ecosystem as a whole. This is also an impli
 Concretely, the objective is to implement a solution that allows a mobile application to initiate an IDV flow with a PFI used to perform KYC that results in a Known Customer Credential issued by the PFI. This KCC can be presented by the holder to the PFI to utilize financial services (e.g. tbDEX value exchange)
 
 ## Context
-As a means to provide clarity, many of the examples in this section will refer to an imaginary mobile application named DIDPay.
+As a means to provide clarity, many of the examples in this section will refer to an imaginary mobile application named Mobile Wallet.
 
-DIDPay is a mobile applicaton that can be used by individuals to:
+Mobile Wallet is a mobile application that can be used by individuals to:
 * Purchase Stablecoin using fiat currency from a PFI via tbDEX. The PFI acts as the custodian of the purchased Stablecoin
 * Send custodied Stablecoin to anyone via tbDEX
 * Sell Stablecoin for fiat currency through a PFI via tbDEX.
 
-DIDPay acts as a **self-custodial** Identity Wallet that:
+Mobile Wallet acts as a **self-custodial** Identity Wallet that:
 * creates a DID for each individual and securely stores private keys directly on device. 
 * stores Verifiable Credentials issued to the user directly on device
 
@@ -134,9 +134,6 @@ DIDPay acts as a **self-custodial** Identity Wallet that:
 This implementation involves 3 distinct participants that have different responsibilities:
 
 ### Mobile App
-
-> [!NOTE]
-> AKA DIDPay
 
 The Mobile app is responsible for:
 * Initiating the IDV flow of a PFI
@@ -169,14 +166,14 @@ sequenceDiagram
 autonumber
 
 participant W as Webview
-participant D as DIDPay
+participant D as Mobile Wallet
 participant P as PFI
 
 D->>+P: GET did:ex:pfi?service=IDV
-P->>P: Construct SIOPv2 Auth Request
-P-->>-D: SIOPv2 Auth Request
-D->>D: Construct SIOPv2 Auth Response
-D->>+P: SIOPv2 Auth Response
+P->>P: Construct SIOPv2 Authorization Request
+P-->>-D: SIOPv2 Authorization Request
+D->>D: Construct SIOPv2 Authorization Response
+D->>+P: SIOPv2 Authorization Response
 P->>P: Construct IDV Request
 P-->>-D: IDV Request
 D->>D: Verify IDV Request
@@ -184,11 +181,11 @@ D->>W: Load URL in IDV Request
 ```
 
 1. Mobile App resolves the PFI's DID and sends an HTTP GET Request to the `serviceEndpoint` of the first `IDV` service found in the resolved DID Document
-2. PFI constructs a [SIOPv2 Auth Request](#siopv2-auth-request)
-3. PFI URI encodes SIOPv2 Auth Request and returns in HTTP response
-4. Wallet verifies integrity of SIOPv2 Auth Request and constructs a [SIOPv2 Auth Response](#siopv2-auth-response)
-5. Wallet POSTs SIOPv2 Auth Response to the `response_uri` from the SIOPv2 Auth Request 
-6. PFI verifies integrity of SIOPv2 Auth Response and constructs IDV Request
+2. PFI constructs a [SIOPv2 Authorization Request](#siopv2-authorization-request)
+3. PFI URI encodes SIOPv2 Authorization Request and returns in HTTP response
+4. Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#siopv2-authorization-response)
+5. Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request 
+6. PFI verifies integrity of SIOPv2 Authorization Response and constructs IDV Request
 7. PFI returns IDV Request in HTTP response
 8. Wallet verifies integrity of IDV Request
 9. Wallet loads URL provided in IDV Request in Webview
@@ -197,18 +194,18 @@ D->>W: Load URL in IDV Request
 > [!WARNING]
 > I don't know if we're breaking OIDC conformance here by using the response returned by RP to convey use-case specific information
 
-### SIOPv2 Auth Request
+### SIOPv2 Authorization Request
 
-| Field                     | Description                                                                                | Required | References                                                                                                                                                                                   | Comments                                                  |
+| Field                     | Description                                                                                  | Required | References                                                                                                                                                                                   | Comments                                                  |
 | :------------------------ | :----------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| `client_id`               | The DID of the RP, which is us (the PFI)                                                   | y        |                                                                                                                                                                                              |                                                           |
-| `scope`                   | What's being requested. 'openid' indicates ID Token is being requested                     | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                    |                                                           |
-| `response_type`           | What sort of response the RP is expecting. MUST include `id_token`. MAY include `vp_token` | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                 |                                                           |
-| `response_uri`            | The URI to which the SIOPv2 Auth Response will be sent                                     | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-7.2)                                                                                                |                                                           |
-| `response_mode`           | The mode in which the SIOPv2 Auth Response will be sent. MUST be `direct_post`             | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-1)                                                                                                  |                                                           |
-| `presentation_definition` | Used by PFI to request VCs as input to IDV process                                         | n        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-presentation_definition-par)                                                                               | If present, Response Type `vp_token` MUST also be present |
-| `nonce`                   | A nonce which MUST be included in the ID Token provided in the SIOPv2 Auth Response        | y        |                                                                                                                                                                                              |                                                           |
-| `client_metadata`         | A JSON object containing the Verifier metadata values                                      | y        | [OIDC](https://openid.net/specs/openid-connect-registration-1_0.html) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-relying-party-client-metada) |                                                           |
+| `client_id`               | The DID of the RP, which is us (the PFI)                                                     | y        |                                                                                                                                                                                              |                                                           |
+| `scope`                   | What's being requested. 'openid' indicates ID Token is being requested                       | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                    |                                                           |
+| `response_type`           | What sort of response the RP is expecting. MUST include `id_token`. MAY include `vp_token`   | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                 |                                                           |
+| `response_uri`            | The URI to which the SIOPv2 Authorization Response will be sent                              | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-7.2)                                                                                                |                                                           |
+| `response_mode`           | The mode in which the SIOPv2 Authorization Response will be sent. MUST be `direct_post`      | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-1)                                                                                                  |                                                           |
+| `presentation_definition` | Used by PFI to request VCs as input to IDV process                                           | n        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-presentation_definition-par)                                                                               | If present, Response Type `vp_token` MUST also be present |
+| `nonce`                   | A nonce which MUST be included in the ID Token provided in the SIOPv2 Authorization Response | y        |                                                                                                                                                                                              |                                                           |
+| `client_metadata`         | A JSON object containing the Verifier metadata values                                        | y        | [OIDC](https://openid.net/specs/openid-connect-registration-1_0.html) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-relying-party-client-metada) |                                                           |
 
 #### Client Metadata
 | Field                            | Description                                                                                                 | Required | References                                                                                              | Comments                  |
@@ -229,25 +226,25 @@ D->>W: Load URL in IDV Request
 
 #### URI Encoding
 
-The SIOPv2 Auth Request is encoded as a URI before being returned to DIDPay, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
+The SIOPv2 Authorization Request is encoded as a URI before being returned to Mobile Wallet, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
 
-### SIOPv2 Auth Response
+### SIOPv2 Authorization Response
 
 | Field                     | Description                                                                                                        | Required | References                                                                                                                                                     | Comments |
 | :------------------------ | :----------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
-| `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Auth Request                                                | y        | [JWT](https://www.rfc-editor.org/info/rfc7519) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
+| `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Authorization Request                                                | y        | [JWT](https://www.rfc-editor.org/info/rfc7519) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
 | `vp_token`                | A Verifiable Presentation or an array of VPs in response to `presentation_definition`                              | n        | [OIDV4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.1-2.2)                                                                 |          |
 | `presentation_submission` | A Presentation Submission that contains mappings between the requested VC and where to find them within `vp_token` | n        | [OIDV4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.1-2.4)                                                                 |          |
 
 #### ID Token
-| Field   | Description                                                                           | Required | References | Comments |
-| :------ | :------------------------------------------------------------------------------------ | :------- | :--------- | :------- |
-| `iss`   | Issuer MUST match the value of `sub`                                                  | y        |            |          |
-| `sub`   | Subject. The DID of the customer applying for KCC                                     | y        |            |          |
-| `aud`   | Audience MUST match the value of `client_id` from the SIOPv2 Auth Request (PFI's DID) | y        |            |          |
-| `nonce` | Nonce MUST match the value of `nonce` from the SIOPv2 Auth Request                    | y        |            |          |
-| `exp`   | Expiry time                                                                           | y        |            |          |
-| `iat`   | Issued at time                                                                        | y        |            |          |
+| Field   | Description                                                                                      | Required | References | Comments |
+| :------ | :----------------------------------------------------------------------------------------------- | :------- | :--------- | :------- |
+| `iss`   | Issuer MUST match the value of `sub`                                                             | y        |            |          |
+| `sub`   | Subject. The DID of the customer applying for KCC                                                | y        |            |          |
+| `aud`   | Audience MUST match the value of `client_id` from the SIOPv2 Authorization Request (PFI's DID)   | y        |            |          |
+| `nonce` | Nonce MUST match the value of `nonce` from the SIOPv2 Authorization Request                      | y        |            |          |
+| `exp`   | Expiry time                                                                                      | y        |            |          |
+| `iat`   | Issued at time                                                                                   | y        |            |          |
 
 ### IDV Request
 | Field              | Description                     | Required | References                                                                                                                            | Comments                                                                                       |
@@ -287,7 +284,7 @@ sequenceDiagram
 autonumber
 
 actor A as Alice 
-participant D as DIDPay
+participant D as Mobile Wallet
 participant W as Webview
 participant P as PFI
 participant V as IDV Vendor
@@ -307,7 +304,7 @@ sequenceDiagram
 autonumber
 
 actor A as Alice 
-participant D as DIDPay
+participant D as Mobile Wallet
 participant W as Webview
 participant P as PFI
 
@@ -329,7 +326,7 @@ W->>W: Close
 sequenceDiagram
 autonumber
 
-participant D as DIDPay
+participant D as Mobile Wallet
 participant P as PFI
 participant V as Vendor
 
