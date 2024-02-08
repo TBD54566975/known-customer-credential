@@ -21,6 +21,7 @@
     * [SIOPv2 Auth Response](#siopv2-auth-response)
       * [ID Token](#id-token)
     * [IDV Request](#idv-request)
+      * [Credential Offer](#credential-offer)
   * [IDV](#idv)
     * [Vendor Collects PII](#vendor-collects-pii)
     * [PFI collects PII](#pfi-collects-pii)
@@ -246,8 +247,20 @@ The SIOPv2 Auth Request is encoded as a URI before being returned to DIDPay, as 
 ### IDV Request
 | Field              | Description                     | Required | References                                                                                                                            | Comments                                                                                       |
 |:-------------------|:--------------------------------|:---------|:--------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------|
-| `url`              | URL of form used to collect PII | y        |                                                                                                                                       | required for now until we figure out how to support exclusively providing credentials as input |
+| `url`              | URL of form used to collect PII | y        |                                                                                                                                       | Required for now until we figure out how to support exclusively providing credentials as input |
 | `credential_offer` |                                 | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#name-credential-offer-parameters) |                                                                                                |
+
+#### Credential Offer
+| Field                          | Description                                                                                                                                                         | Required | References                                                                                                             | Comments |
+|:-------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:-----------------------------------------------------------------------------------------------------------------------|:---------|
+| `credential_issuer`            | The URL of the Credential Issuer that the Wallet will interact with in subsequent steps                                                                             | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.1) |          |
+| `credential_configuration_ids` | Array of unique strings that each identify a credential being offered. Wallet can use these to request metadata                                                     | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.2) |          |
+| `grants`                       | Object containing Grant Types that the Credential Issuer will accept for this credential offer. MUST contain `urn:ietf:params:oauth:grant-type:pre-authorized_code` | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.3) |          |
+
+#### Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized_code
+| Field                 | Description                                                                             | Required | References                                                                                                                 | Comments |
+|:----------------------|:----------------------------------------------------------------------------------------|:---------|:---------------------------------------------------------------------------------------------------------------------------|:---------|
+| `pre-authorized_code` | The URL of the Credential Issuer that the Wallet will interact with in subsequent steps | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |
 
 > [!WARNING] 
 > TODO: explain rationale behind providing `credential_offer` at this stage
