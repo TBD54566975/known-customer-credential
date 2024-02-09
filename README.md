@@ -182,12 +182,12 @@ D->>W: Load URL in IDV Request
 1. Mobile App resolves the PFI's DID and sends an HTTP GET Request to the `serviceEndpoint` of the first `IDV` service found in the resolved DID Document
 2. PFI constructs a [SIOPv2 Authorization Request](#siopv2-authorization-request)
 3. PFI URI encodes SIOPv2 Authorization Request and returns in HTTP response
-4. Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#siopv2-authorization-response)
-5. Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request 
+4. Mobile Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#siopv2-authorization-response)
+5. Mobile Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request 
 6. PFI verifies integrity of SIOPv2 Authorization Response and constructs IDV Request
 7. PFI returns IDV Request in HTTP response
-8. Wallet verifies integrity of IDV Request
-9. Wallet loads URL provided in IDV Request in Webview
+8. Mobile Wallet verifies integrity of IDV Request
+9. Mobile Wallet loads URL provided in IDV Request in Webview
 
 
 > [!WARNING]
