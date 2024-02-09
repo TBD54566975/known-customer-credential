@@ -52,7 +52,7 @@ Financial institutions often leverage IDV Vendors to streamline the IDV process.
 
 Integration with IDV vendors happens in 1 of 2 ways:
 
-#### PII Collected by Vendor
+#### PII Collected by IDV Vendor
 1. IDV Vendor provides an SDK that takes control of the user interface for PII collection 
 2. PII is submitted directly to the vendor's backend system 
 3. IDV Vendor notifies the PFI via webhook request when IDV is complete
