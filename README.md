@@ -266,7 +266,7 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 
 #### Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized_code
 | Field                 | Description                                                                                              | Required | References                                                                                                                 | Comments |
-| :-------------------- |:-------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------- |
+| :-------------------- | :------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------- |
 | `pre-authorized_code` | The code representing the Credential Issuer's authorization for the Mobile Wallet to obtain a credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |          |
 
 > [!WARNING] 
