@@ -5,7 +5,7 @@
   - [KYC Background](#kyc-background)
     - [Identity Verification](#identity-verification)
     - [IDV Vendor Integrations](#idv-vendor-integrations)
-      - [PII Collected by Vendor](#pii-collected-by-vendor)
+      - [PII Collected by IDV Vendor](#pii-collected-by-idv-vendor)
       - [PII Collected by PFI](#pii-collected-by-pfi)
 - [Requirements](#requirements)
 - [Implementation Details](#implementation-details)
@@ -25,7 +25,7 @@
       - [Grants](#grants)
       - [Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized\_code](#grant-type-urnietfparamsoauthgrant-typepre-authorized_code)
   - [IDV](#idv)
-    - [Vendor Collects PII](#vendor-collects-pii)
+    - [IDV Vendor Collects PII](#idv-vendor-collects-pii)
     - [PFI collects PII](#pfi-collects-pii)
   - [Credential Issuance](#credential-issuance)
 - [Other Considerations](#other-considerations)
@@ -46,22 +46,22 @@ Regulatory KYC requirements can vary by region with respect to the information t
 ### Identity Verification
 IDV (Identity Verification) is a critical component of KYC wherein the PII (Personally Identifying Information) collected from an individual is verified using third party resources. IDV often includes steps such as verification of a valid government-issued photo ID, liveness checks, and verification of user-submitted PII against authoritative databases.
 
-Financial Institutions often leverage IDV Vendors to streamline the IDV process.
+Financial institutions often leverage IDV Vendors to streamline the IDV process.
 
 ### IDV Vendor Integrations
 
 Integration with IDV vendors happens in 1 of 2 ways:
 
-#### PII Collected by Vendor
-* Vendor provides an SDK that takes control of the user interface for PII collection. 
+#### PII Collected by IDV Vendor
+* IDV Vendor provides an SDK that takes control of the user interface for PII collection. 
 * PII is submitted directly to the vendor's backend system 
-* Vendor notifies financial institution via webhooks requests when IDV is complete
-* Financial institution requests IDV result and PII from vendor 
+* IDV Vendor notifies financial institution via webhooks requests when IDV is complete
+* Financial institution requests IDV result and PII from IDV Vendor 
 
 
 #### PII Collected by PFI
 * PII is collected by the financial institution
-* PII is subsequently sent to the IDV vendor via the backend system for verification
+* PII is subsequently sent to the IDV Vendor via the backend system for verification
 
 > [!IMPORTANT]
 > Web-based IDV is necessary for reasons that are explained in this document
@@ -70,7 +70,7 @@ Integration with IDV vendors happens in 1 of 2 ways:
 This body of work is an extension of the work being done for tbDEX. In effect, this proposal considers the following as requirements:
 
 
-1. **Must support all IDV flows described in the [IDV Flows](#identity-verification) section of this document**
+1. **Must support all IDV flows described in the [IDV Vendor Integrations](#idv-vendor-integrations) section of this document**
 
 Ensuring that this is possible is essential to reduce friction or pain points for financial institutions interested in providing liquidity on tbDEX
 
@@ -278,7 +278,7 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 > [!IMPORTANT]
 > Whether the PFI is utilizing an IDV vendor is entirely opaque from the originating mobile app's perspective.
 
-### Vendor Collects PII
+### IDV Vendor Collects PII
 ```mermaid
 sequenceDiagram
 autonumber
@@ -328,7 +328,7 @@ autonumber
 
 participant D as Mobile Wallet
 participant P as PFI
-participant V as Vendor
+participant V as IDV Vendor
 
 D->>P: Token Request
 P->>D: Access Token
