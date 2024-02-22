@@ -52,7 +52,7 @@ Financial institutions often leverage IDV Vendors to streamline the IDV process.
 
 Integration with IDV vendors happens in 1 of 2 ways:
 
-#### PII Collected by Vendor
+#### PII Collected by IDV Vendor
 1. IDV Vendor provides an SDK that takes control of the user interface for PII collection 
 2. PII is submitted directly to the vendor's backend system 
 3. IDV Vendor notifies the PFI via webhook request when IDV is complete
@@ -182,12 +182,12 @@ D->>W: Load URL in IDV Request
 1. Mobile App resolves the PFI's DID and sends an HTTP GET Request to the `serviceEndpoint` of the first `IDV` service found in the resolved DID Document
 2. PFI constructs a [SIOPv2 Authorization Request](#siopv2-authorization-request)
 3. PFI URI encodes SIOPv2 Authorization Request and returns in HTTP response
-4. Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#siopv2-authorization-response)
-5. Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request 
+4. Mobile Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#siopv2-authorization-response)
+5. Mobile Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request 
 6. PFI verifies integrity of SIOPv2 Authorization Response and constructs IDV Request
 7. PFI returns IDV Request in HTTP response
-8. Wallet verifies integrity of IDV Request
-9. Wallet loads URL provided in IDV Request in Webview
+8. Mobile Wallet verifies integrity of IDV Request
+9. Mobile Wallet loads URL provided in IDV Request in Webview
 
 
 > [!WARNING]
@@ -254,20 +254,20 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 #### Credential Offer
 | Field                          | Description                                                                                                                                                         | Required | References                                                                                                             | Comments |
 | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------- | :--------------------------------------------------------------------------------------------------------------------- | :------- |
-| `credential_issuer`            | The URL of the Credential Issuer that the Wallet will interact with in subsequent steps                                                                             | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.1) |          |
-| `credential_configuration_ids` | Array of unique strings that each identify a credential being offered. Wallet can use these to request metadata                                                     | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.2) |          |
+| `credential_issuer`            | The URL of the Credential Issuer that the Mobile Wallet will interact with in subsequent steps                                                                      | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.1) |          |
+| `credential_configuration_ids` | Array of unique strings that each identify a credential being offered. Mobile Wallet can use these to request metadata                                              | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.2) |          |
 | `grants`                       | Object containing Grant Types that the Credential Issuer will accept for this credential offer. MUST contain `urn:ietf:params:oauth:grant-type:pre-authorized_code` | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.3) |          |
 
 #### Grants 
-| Field                                                  | Description                                                                                      | Required | References                                                                                                               | Comments |
-| :----------------------------------------------------- | :----------------------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------------------- | :------- |
-| `urn:ietf:params:oauth:grant-type:pre-authorized_code` | Grant Type that allows the Wallet to follow a Pre-Authorized Code Flow to collect the credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.1) |          |
+| Field                                                  | Description                                                                                             | Required | References                                                                                                               | Comments |
+| :----------------------------------------------------- | :------------------------------------------------------------------------------------------------------ | :------- | :----------------------------------------------------------------------------------------------------------------------- | :------- |
+| `urn:ietf:params:oauth:grant-type:pre-authorized_code` | Grant Type that allows the Mobile Wallet to follow a Pre-Authorized Code Flow to collect the credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.1) |          |
 
 
 #### Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized_code
-| Field                 | Description                                                                                       | Required | References                                                                                                                 | Comments |
-| :-------------------- | :------------------------------------------------------------------------------------------------ | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------- |
-| `pre-authorized_code` | The code representing the Credential Issuer's authorization for the Wallet to obtain a credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |          |
+| Field                 | Description                                                                                              | Required | References                                                                                                                 | Comments |
+| :-------------------- | :------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------- |
+| `pre-authorized_code` | The code representing the Credential Issuer's authorization for the Mobile Wallet to obtain a credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |          |
 
 > [!WARNING] 
 > TODO: explain rationale behind providing `credential_offer` at this stage
