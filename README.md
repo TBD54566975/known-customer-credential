@@ -193,6 +193,46 @@ D->>W: Load URL in IDV Request
 > [!WARNING]
 > I don't know if we're breaking OIDC conformance here by using the response returned by RP to convey use-case specific information
 
+## IDV Flow with Wallet
+
+Initiating the IDV flow is done using [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html).
+
+```mermaid
+sequenceDiagram
+autonumber
+
+participant W as Webview/Browser
+participant D as Mobile Wallet
+participant F as Financial App
+participant P as PFI
+
+F->>+P: GET did:ex:pfi?service=IDV
+P->>P: Construct SIOPv2 Authorization Request
+P-->>-F: SIOPv2 Authorization Request
+F-->>W: SIOPv2 Authorization Request
+W->>W: Wallet Selection UI
+W-->>D: SIOPv2 Authorization Request
+D->>D: Construct SIOPv2 Authorization Response
+D->>+P: SIOPv2 Authorization Response
+P->>P: Construct IDV Request
+P-->>-D: IDV Request
+D->>D: Verify IDV Request
+D->>W: Load URL in IDV Request
+```
+
+1. Financial App resolves the PFI's DID and sends an HTTP GET Request to the `serviceEndpoint` of the first `IDV` service found in the resolved DID Document
+2. PFI constructs a [SIOPv2 Authorization Request](#siopv2-authorization-request)
+3. PFI URI encodes SIOPv2 Authorization Request and returns in HTTP response
+4. Financial App sends the SIOPv2 Authorization Request to the browser at a qualified pre-determined `https://web5.foundation` url
+5. User selects a wallet from the Wallet Selection UI which sends the user to the Universal Link (https secured scheme) for that wallet
+6. Website forwards the `SIOIPv2 Authorization Request` to the scheme handler for that Wallet
+7. Mobile Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#siopv2-authorization-response)
+8. Mobile Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request 
+9. PFI verifies integrity of SIOPv2 Authorization Response and constructs IDV Request
+10. PFI returns IDV Request in HTTP response
+11. Mobile Wallet verifies integrity of IDV Request
+12. Mobile Wallet loads URL provided in IDV Request in ASWebAuthenticationSession (iOS) or Android Custom Tabs (Android)
+
 ### SIOPv2 Authorization Request
 
 | Field                     | Description                                                                                  | Required | References                                                                                                                                                                                   | Comments                                                  |
