@@ -2,6 +2,7 @@
 
 <!-- TOC -->
 - [Introduction](#introduction)
+  - [Known Customer Credential](#known-customer-credential)
   - [Know Your Customer Background](#know-your-customer-background)
     - [Identity Verification](#identity-verification)
     - [IDV Vendor Integrations](#idv-vendor-integrations)
@@ -33,7 +34,11 @@
 
 
 # Introduction
-This document proposes a standardized means for PFIs (Participating Financial Institutions) to perform IDV (Identity Verification) on a DID (Decentralized Identifier) controlled by a retail customer for the purpose of providing financial services to that DID in accordance to regulatory Know Your Customer requirements.
+This document proposes a standardized means for PFIs (Participating Financial Institution) to perform KYC (Know Your Customer) and issue a subsequent KCC (Known Customer Credential) on a DID (Decentralized Identifer) controlled by a retail customer for the purpose of providing financial services to that DID in accordance to regulatory requirements.
+
+## Known Customer Credential
+
+KCC (Known Customer Credential) is a [VC (Verifiable Credential)](https://www.w3.org/TR/vc-data-model-2.0/) which is intended to be utilized by a retail customer as proof of an actively compliant KYC verification.
 
 ## Know Your Customer Background
 In the financial industry, KYC (Know Your Customer) is term used to describe a set of policies, procedures, and processes that financial institutions use to determine the true identity of a customer, and assess the on-going risk that a customer poses to an organization during the life-time of a customer relationship. KYC typically encompasses:
