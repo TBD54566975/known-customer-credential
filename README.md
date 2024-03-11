@@ -394,16 +394,34 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 [Reference](https://datatracker.ietf.org/doc/html/rfc8414)
 
 ### Access Token Request
+| Field        | Description                                                                       | Required | References                                                                                                                 | Comments                                                       |
+| :----------- | :-------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
+| `grant_type` |                                                                                   | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-3.5-3)                         | MUST be `urn:ietf:params:oauth:grant-type:pre-authorized_code` |
+| `code`       | The value of `pre-authorized_code` from the [Credential Offer](#credential-offer) | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |                                                                |
+| `client_id`  | The client DID                                                                    | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.1-5)                         |                                                                |
 
-From https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-endpoint
-TODO pre auth code authorization flow for `authorization_pending`
-TODO
+[Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-request)
+[Reference](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3)
 
 ### Access Token Response
+| Field          | Description                                       | Required | References                                                             | Comments         |
+| :------------- | :------------------------------------------------ | :------- | :--------------------------------------------------------------------- | :--------------- |
+| `access_token` | The access token granted                          | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2) |                  |
+| `token_type`   |                                                   | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2) | MUST be `bearer` |
+| `expires_in`   | Seconds from issue until the access token expires | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2) |                  |
 
-From https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-successful-token-response
-And https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-error-response
-TODO
+[Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-successful-token-response)
+[Reference](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.4)
+
+> [!WARNING]
+> TODO we need to define error responses https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2.1
+> TODO including `authorization_pending` https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-error-response
+
+> [!WARNING]
+> TODO we need to determine if Alice's DID will be in the access_token's JWT header (as the sub field)
+
+> [!WARNING]
+> TODO we need to define refresh token flows
 
 ### Credential Endpoint
 
@@ -428,7 +446,6 @@ D->>P: Deferred Credential Request
 P->>D: Credential Response w/ Credential
 P->>P: Invalidate preauth code
 ```
-
 
 # Other Considerations
 
