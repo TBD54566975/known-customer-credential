@@ -391,6 +391,7 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 | `token_endpoint` | URL for the [Access Token Request](#access-token-request) | y        | [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414#section-2) |                                   |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.3)
+
 [Reference](https://datatracker.ietf.org/doc/html/rfc8414)
 
 ### 2. Access Token
@@ -403,6 +404,7 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 | `client_id`  | The client DID                                                                    | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.1-5)                         |                                                                |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-request)
+
 [Reference](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3)
 
 #### Access Token Response
@@ -415,10 +417,12 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 | `c_nonce_expires_in` | Seconds from issue until the `c_nonce` expires                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.2) |                  |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-successful-token-response)
+
 [Reference](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.4)
 
 > [!WARNING]
 > TODO we need to define error responses https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2.1
+> 
 > TODO including `authorization_pending` https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-error-response
 
 > [!WARNING]
