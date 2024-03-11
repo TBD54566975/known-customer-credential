@@ -29,6 +29,11 @@
     - [IDV Vendor Collects PII](#idv-vendor-collects-pii)
     - [PFI collects PII](#pfi-collects-pii)
   - [Credential Issuance](#credential-issuance)
+    - [Credential Access Token](#credential-access-token)
+      - [Credential Issuer Metadata](#credential-issuer-metadata)
+      - [Authorization Server Metadata](#authorization-server-metadata)
+      - [Token Endpoint](#token-endpoint)
+    - [Credential Endpoint](#credential-endpoint)
 - [Other Considerations](#other-considerations)
 <!-- TOC -->
 
@@ -325,6 +330,57 @@ W->>W: Close
 
 
 ## Credential Issuance
+
+### Credential Access Token
+
+In order for a credential to be issued (TODO link to credential endpoint), an `access_token` is required. 
+
+```mermaid
+sequenceDiagram
+autonumber
+
+participant D as Mobile Wallet
+participant P as PFI
+
+D->>P: GET /.well-known/openid-credential-issuer
+P-->>D: Credential Issuer Metadata
+D->>P: GET /.well-known/oauth-authorization-server
+P-->>D: Authorization Server Metadata
+D->>P: Token Endpoint
+P-->>D: Access Token Response
+```
+
+TODO pre auth code authorization flow for `authorization_pending`
+
+1. Request the [Credential Issuer Metadata](#credential-issuer-metadata) by constructing the URL: `credential_issuer` + `/.well-known/openid-credential-issuer` (where `credential_issuer` is within the [Credential Offer](#credential-offer) which is returned to the Mobile Wallet in the [IDV Request](#idv-request))
+2. Response is [Credential Issuer Metadata](#credential-issuer-metadata)
+3. Request the [Authorization Server Metadata](#authorization-server-metadata) by constructing the URL: `authorization_servers[0]` + `/.well-known/oauth-authorization-server` (where `authorization_servers` is within the [Credential Issuer Metadata](#credential-issuer-metadata))
+4. Response is [Authorization Server Metadata](#authorization-server-metadata)
+5. Request the [Token Endpoint](#token-endpoint) by using the `token_endpoint` from the [Authorization Server Metadata](#authorization-server-metadata)
+
+TODO references to specs
+- [Credential Issuer Metadata](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11)
+- [Authorization Server Metadata](https://www.rfc-editor.org/rfc/rfc8414.html)
+
+> ![Note]
+> It's assumed `authorization_servers` array is of size 1
+
+#### Credential Issuer Metadata
+
+From https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3
+TODO
+
+#### Authorization Server Metadata
+
+From https://www.rfc-editor.org/rfc/rfc8414.html#section-3.2
+TODO
+
+#### Token Endpoint
+
+From https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-endpoint
+TODO
+
+### Credential Endpoint
 
 ```mermaid
 sequenceDiagram
