@@ -35,7 +35,7 @@
     - [Authorization Server Metadata](#authorization-server-metadata)
     - [Access Token Request](#access-token-request)
     - [Access Token Response](#access-token-response)
-    - [Credential Endpoint](#credential-endpoint)
+  - [Credential Endpoint](#credential-endpoint)
 - [Other Considerations](#other-considerations)
 <!-- TOC -->
 
@@ -423,7 +423,7 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 > [!WARNING]
 > TODO we need to define refresh token flows
 
-### Credential Endpoint
+## Credential Endpoint
 
 ```mermaid
 sequenceDiagram
