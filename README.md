@@ -356,6 +356,10 @@ P-->>D: Token Response
 5. [Access Token Request](#access-token-request)
 6. [Access Token Response](#access-token-response)
 
+> [!NOTE]
+> The [Credential Issuer Metadata](#credential-issuer-metadata) contains the `credential_endpoint` for the [Credential Endpoint](#credential-endpoint).
+> The [Authorization Server Metadata](#authorization-server-metadata) contains the `token_endpoint` for the [Access Token Request](#access-token-request)
+
 ### Constructing .well-known URL's
 
 URLs to retrieve both [Credential Issuer Metadata](#credential-issuer-metadata) and [Authorization Server Metadata](#authorization-server-metadata) are dynamically constructed by the client [using `.well-known` URI's](https://www.rfc-editor.org/rfc/rfc5785).
@@ -388,7 +392,7 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 | Field            | Description                                          | Required | References                                                         | Comments                          |
 | :--------------- | :--------------------------------------------------- | :------- | :----------------------------------------------------------------- | :-------------------------------- |
 | `issuer`         | URL of then Credential Issuer                        | y        | [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414#section-2) | Same value as `credential_issuer` |
-| `token_endpoint` | URL of [Access Token Request](#access-token-request) | y        | [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414#section-2) |                                   |
+| `token_endpoint` | URL for the [Access Token Request](#access-token-request) | y        | [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414#section-2) |                                   |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.3)
 [Reference](https://datatracker.ietf.org/doc/html/rfc8414)
