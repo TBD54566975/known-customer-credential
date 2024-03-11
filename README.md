@@ -201,7 +201,7 @@ D->>W: Load URL in IDV Request
 ### SIOPv2 Authorization Request
 
 | Field                     | Description                                                                                  | Required | References                                                                                                                                                                                   | Comments                                                  |
-| :------------------------ | :----------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
+| :------------------------ | :------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
 | `client_id`               | The DID of the RP, which is us (the PFI)                                                     | y        |                                                                                                                                                                                              |                                                           |
 | `scope`                   | What's being requested. 'openid' indicates ID Token is being requested                       | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                    |                                                           |
 | `response_type`           | What sort of response the RP is expecting. MUST include `id_token`. MAY include `vp_token`   | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                 |                                                           |
@@ -236,19 +236,19 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 
 | Field                     | Description                                                                                                        | Required | References                                                                                                                                                     | Comments |
 | :------------------------ | :----------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
-| `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Authorization Request                                                | y        | [JWT](https://www.rfc-editor.org/info/rfc7519) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
+| `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Authorization Request                                       | y        | [JWT](https://www.rfc-editor.org/info/rfc7519) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
 | `vp_token`                | A Verifiable Presentation or an array of VPs in response to `presentation_definition`                              | n        | [OIDV4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.1-2.2)                                                                 |          |
 | `presentation_submission` | A Presentation Submission that contains mappings between the requested VC and where to find them within `vp_token` | n        | [OIDV4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.1-2.4)                                                                 |          |
 
 #### ID Token
-| Field   | Description                                                                                      | Required | References | Comments |
-| :------ | :----------------------------------------------------------------------------------------------- | :------- | :--------- | :------- |
-| `iss`   | Issuer MUST match the value of `sub`                                                             | y        |            |          |
-| `sub`   | Subject. The DID of the customer applying for KCC                                                | y        |            |          |
-| `aud`   | Audience MUST match the value of `client_id` from the SIOPv2 Authorization Request (PFI's DID)   | y        |            |          |
-| `nonce` | Nonce MUST match the value of `nonce` from the SIOPv2 Authorization Request                      | y        |            |          |
-| `exp`   | Expiry time                                                                                      | y        |            |          |
-| `iat`   | Issued at time                                                                                   | y        |            |          |
+| Field   | Description                                                                                    | Required | References | Comments |
+| :------ | :--------------------------------------------------------------------------------------------- | :------- | :--------- | :------- |
+| `iss`   | Issuer MUST match the value of `sub`                                                           | y        |            |          |
+| `sub`   | Subject. The DID of the customer applying for KCC                                              | y        |            |          |
+| `aud`   | Audience MUST match the value of `client_id` from the SIOPv2 Authorization Request (PFI's DID) | y        |            |          |
+| `nonce` | Nonce MUST match the value of `nonce` from the SIOPv2 Authorization Request                    | y        |            |          |
+| `exp`   | Expiry time                                                                                    | y        |            |          |
+| `iat`   | Issued at time                                                                                 | y        |            |          |
 
 ### IDV Request
 | Field              | Description                     | Required | References                                                                                                                            | Comments                                                                                       |
