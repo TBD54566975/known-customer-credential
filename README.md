@@ -375,9 +375,9 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3)
 
 #### `credential_configurations_supported`
-| Field    | Description                     | Required | References                                                                                                   | Comments                                  |
-| :------- | :------------------------------ | :------- | :----------------------------------------------------------------------------------------------------------- | :---------------------------------------- |
-| `format` | Format for the given credential | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.2.1) | Our `format` will always be `jwt_vc_json` |
+| Field    | Description                     | Required | References                                                                                                   | Comments              |
+| :------- | :------------------------------ | :------- | :----------------------------------------------------------------------------------------------------------- | :-------------------- |
+| `format` | Format for the given credential | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.2.1) | MUST be `jwt_vc_json` |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.1)
 
@@ -404,11 +404,13 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 [Reference](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3)
 
 ### Access Token Response
-| Field          | Description                                       | Required | References                                                             | Comments         |
-| :------------- | :------------------------------------------------ | :------- | :--------------------------------------------------------------------- | :--------------- |
-| `access_token` | The access token granted                          | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2) |                  |
-| `token_type`   |                                                   | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2) | MUST be `bearer` |
-| `expires_in`   | Seconds from issue until the access token expires | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2) |                  |
+| Field                | Description                                                                          | Required | References                                                                                           | Comments         |
+| :------------------- | :----------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :--------------- |
+| `access_token`       | The access token granted                                                             | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               |                  |
+| `token_type`         |                                                                                      | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | MUST be `bearer` |
+| `expires_in`         | Seconds from issue until the access token expires                                    | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               |                  |
+| `c_nonce`            | A nonce for use in the subsquent call to [Credential Endpoint](#credential-endpoint) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |                  |
+| `c_nonce_expires_in` | Seconds from issue until the `c_nonce` expires                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.2) |                  |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-successful-token-response)
 [Reference](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.4)
