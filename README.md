@@ -388,9 +388,6 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.1)
 
-> [!WARNING]
-> TODO we need to further define how we want to implement `credential_configurations_supported`, there are additional fields
-
 #### Authorization Server Metadata
 | Field            | Description                                               | Required | References                                                         | Comments                          |
 | :--------------- | :-------------------------------------------------------- | :------- | :----------------------------------------------------------------- | :-------------------------------- |
