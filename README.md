@@ -517,7 +517,7 @@ The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Autho
 | Field            | Description                                                                                | Required | References                                                                                           | Comments                                      |
 | :--------------- | :----------------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------- |
 | `credential`     | The credential in `jwt_vc_json` format                                                     | n        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3-6.1) | If missing, `transaction_id` must be present  |
-| `transaction_id` | ID used for subsequent call to [Deferred Credential Request](#deferred-credential-request) |          | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3-6.2) | If missing, then `credential` must be present |
+| `transaction_id` | ID used for subsequent call to [Deferred Credential Request](#deferred-credential-request) | n        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3-6.2) | If missing, then `credential` must be present |
 
 > [!WARNING]
 > TODO we need to define the c_nonce stuff for the deferred flow; right now `proof` is embedded under the Credential Request, but it's applicable against the deferred and batch credential requests
