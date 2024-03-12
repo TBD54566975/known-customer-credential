@@ -37,6 +37,8 @@
     - [2. Access Token](#2-access-token)
       - [Access Token Request](#access-token-request)
       - [Access Token Response](#access-token-response)
+        - [`access_token` JOSE Header](#access_token-jose-header)
+        - [`access_token` Claims](#access_token-claims)
     - [3. Issuance](#3-issuance)
       - [Credential Request](#credential-request)
         - [`proof`](#proof)
@@ -429,10 +431,22 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 > TODO including `authorization_pending` https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-error-response
 
 > [!WARNING]
-> TODO we need to determine if Alice's DID will be in the access_token's JWT header (as the sub field)
-
-> [!WARNING]
 > TODO we need to define refresh token flows
+
+##### `access_token` JOSE Header
+| Field | Description                                                  | Required | References                                                             | Comments                                         |
+| :---- | :----------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :----------------------------------------------- |
+| `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1) | Accepted values are `EdDSA` or `ES256K`          |
+| `kid` | (KeyID) The fully qualified DID Key ID                       | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4) | In the form `did:{method}:{identifier}#{key_id}` |
+| `typ` | (Type) The explicit JWT type                                 | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9) | MUST be `kcc+jwt`                                |
+
+##### `access_token` Claims
+| Field | Description                                                        | Required | References                                                             | Comments |
+| :---- | :----------------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :------- |
+| `iss` | (Issuer) The DID of the Credential Issuer                          | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1) |          |
+| `sub` | (Subject) The DID of the customer applying for KCC (Applicant DID) | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2) |          |
+| `exp` | (Expiration) The time at which the `access_token` expires          | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4) |          |
+| `iat` | (IssuedAt) The time at which the `access_token` was granted        | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6) |          |
 
 ### 3. Issuance
 
