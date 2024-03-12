@@ -257,7 +257,7 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 #### ID Token
 | Field   | Description                                                                                    | Required | References | Comments |
 | :------ | :--------------------------------------------------------------------------------------------- | :------- | :--------- | :------- |
-| `iss`   | Issuer MUST match the value of `sub`                                                           | y        |            |          |
+| `iss`   | Issuer MUST match the value of `sub` (Applicant's DID)                                         | y        |            |          |
 | `sub`   | Subject. The DID of the customer applying for KCC                                              | y        |            |          |
 | `aud`   | Audience MUST match the value of `client_id` from the SIOPv2 Authorization Request (PFI's DID) | y        |            |          |
 | `nonce` | Nonce MUST match the value of `nonce` from the SIOPv2 Authorization Request                    | y        |            |          |
@@ -375,9 +375,12 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3)
 
 ##### `credential_configurations_supported`
-| Field    | Description                     | Required | References                                                                                                   | Comments              |
-| :------- | :------------------------------ | :------- | :----------------------------------------------------------------------------------------------------------- | :-------------------- |
-| `format` | Format for the given credential | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.2.1) | MUST be `jwt_vc_json` |
+| Field                                     | Description                                        | Required | References                                                                                                     | Comments                                                                       |
+| :---------------------------------------- | :------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| `format`                                  | Format for the given credential                    | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.2.1)   | MUST be `jwt_vc_json`                                                          |
+| `cryptographic_binding_methods_supported` | List of supported DID Methods                      | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.2.3)   | Accepted values are `did:web`, `did:jwk`, or `did:dht`                         |
+| `credential_signing_alg_values_supported` | List of supported cryprographic signing algorithms | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.2.4)   | Accepted values are `EdDSA` or `ES256K`                                        |
+| `proof_types_supported`                   | Object that describes the supported key proof      | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.2.5.1) | MUST be `{"jwt": {"proof_signing_alg_values_supported": ["EdDSA", "ES256K"]}}` |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.1)
 
