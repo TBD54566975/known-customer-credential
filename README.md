@@ -492,6 +492,8 @@ The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Autho
 | `proof_type` | The type of proof | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.2.2.1) | MUST be `jwt` |
 | `jwt`        | The proof JWT     | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1)     |               |
 
+[Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.2.1)
+
 ###### `proof.jwt` JOSE Headers
 | Field | Description                                                  | Required | References                                                                                                   | Comments                                         |
 | :---- | :----------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
