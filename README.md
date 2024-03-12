@@ -42,6 +42,8 @@
     - [3. Issuance](#3-issuance)
       - [Credential Request](#credential-request)
         - [`proof`](#proof)
+          - [`proof.jwt` JOSE Headers](#proofjwt-jose-headers)
+          - [`proof.jwt` Claims](#proofjwt-claims)
       - [Credential Response](#credential-response)
       - [Deferred Credential Request](#deferred-credential-request)
       - [Deferred Credential Response](#deferred-credential-response)
@@ -429,6 +431,8 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 > TODO we need to define error responses https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2.1
 > 
 > TODO including `authorization_pending` https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-error-response
+> 
+>     the `authorization_pending` occurs here, and is approved by 
 
 > [!WARNING]
 > TODO we need to define refresh token flows
@@ -437,7 +441,7 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 | Field | Description                                                  | Required | References                                                             | Comments                                         |
 | :---- | :----------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :----------------------------------------------- |
 | `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1) | Accepted values are `EdDSA` or `ES256K`          |
-| `kid` | (KeyID) The fully qualified DID Key ID                       | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4) | In the form `did:{method}:{identifier}#{key_id}` |
+| `kid` | (KeyID) The fully qualified DID Key ID of the signer         | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4) | In the form `did:{method}:{identifier}#{key_id}` |
 | `typ` | (Type) The explicit JWT type                                 | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9) | MUST be `kcc+jwt`                                |
 
 ##### `access_token` Claims
@@ -488,6 +492,25 @@ The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Autho
 | `proof_type` | The type of proof | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.2.2.1) | MUST be `jwt` |
 | `jwt`        | The proof JWT     | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1)     |               |
 
+###### `proof.jwt` JOSE Headers
+| Field | Description                                                  | Required | References                                                                                                   | Comments                                         |
+| :---- | :----------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
+| `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.1.2.1) | Accepted values are `EdDSA` or `ES256K`          |
+| `typ` | (Type) The explicit JWT type                                 | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.1.2.2) | MUST be `openid4vci-proof+jwt`                   |
+| `kid` | (KeyID) The fully qualified DID Key ID of the signer         | y        | [OID4VCI](openid4vci-proof+jwt)                                                                              | In the form `did:{method}:{identifier}#{key_id}` |
+
+[Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.1.1)
+
+###### `proof.jwt` Claims
+| Field   | Description                                                                         | Required | References                                                                                                   | Comments |
+| :------ | :---------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------- | :------- |
+| `iss`   | (Issuer) The DID of the customer applying for KCC (Applicant DID)                   | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.1) |          |
+| `aud`   | (Audience) The DID of the Credential Issuer                                         | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.2) |          |
+| `iat`   | (IssuedAt) The time at which the key proof was created                              | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.3) |          |
+| `nonce` | The value of the `c_nonce` from the [Access Token Response](#access-token-response) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.4) |          |
+
+[Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.1)
+
 #### Credential Response
 | Field            | Description                                                                                | Required | References                                                                                           | Comments                                      |
 | :--------------- | :----------------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------- |
@@ -495,7 +518,7 @@ The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Autho
 | `transaction_id` | ID used for subsequent call to [Deferred Credential Request](#deferred-credential-request) |          | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3-6.2) | If missing, then `credential` must be present |
 
 > [!WARNING]
-> TODO we need to define the c_nonce stuff for the deferred flow
+> TODO we need to define the c_nonce stuff for the deferred flow; right now `proof` is embedded under the Credential Request, but it's applicable against the deferred and batch credential requests
 
 #### Deferred Credential Request
 
