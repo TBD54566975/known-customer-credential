@@ -29,17 +29,17 @@
     - [IDV Vendor Collects PII](#idv-vendor-collects-pii)
     - [PFI collects PII](#pfi-collects-pii)
   - [Credential Issuance](#credential-issuance)
-    - [1. Metadata](#1-metadata)
-      - [Constructing .well-known URL's](#constructing-well-known-urls)
+    - [1. Metadata Endpoints](#1-metadata-endpoints)
+      - [Well Known Endpoints](#well-known-endpoints)
       - [Credential Issuer Metadata](#credential-issuer-metadata)
         - [`credential_configurations_supported`](#credential_configurations_supported)
       - [Authorization Server Metadata](#authorization-server-metadata)
-    - [2. Access Token](#2-access-token)
-      - [Access Token Request](#access-token-request)
-      - [Access Token Response](#access-token-response)
+    - [2. Authorization Endpoints](#2-authorization-endpoints)
+      - [Token Request](#token-request)
+      - [Token Response](#token-response)
         - [`access_token` JOSE Header](#access_token-jose-header)
         - [`access_token` Claims](#access_token-claims)
-    - [3. Issuance](#3-issuance)
+    - [3. Issuance Endpoints](#3-issuance-endpoints)
       - [Credential Request](#credential-request)
         - [`proof`](#proof)
           - [`proof.jwt` JOSE Headers](#proofjwt-jose-headers)
@@ -352,17 +352,19 @@ participant P as PFI
 
 D->>P: Fetch metadata
 P-->>D: Metadata
-D->>P: Request access token
-P-->>D: Access token
+D->>P: Request authorization
+P-->>D: Authorize
 D->>P: Issue credential
 P-->>D: Credential
 ```
 
-### 1. Metadata
+### 1. Metadata Endpoints
 
-#### Constructing .well-known URL's
+Metadata resources are hosted by the Credential Issuer as a means of informing client's of endpoint locations, technical capabilities, feature support and (internationalized) display information.
 
-URLs to retrieve both [Credential Issuer Metadata](#credential-issuer-metadata) and [Authorization Server Metadata](#authorization-server-metadata) are dynamically constructed by the client [using `.well-known` URI's](https://www.rfc-editor.org/rfc/rfc5785).
+#### Well Known Endpoints
+
+Credential Issuers are required to set up a number of well known endpoints to facilitate authorization, authentication, and credential issuance as follows. URLs to retrieve both [Credential Issuer Metadata](#credential-issuer-metadata) and [Authorization Server Metadata](#authorization-server-metadata) are dynamically constructed by the client [using `.well-known` URI's](https://www.rfc-editor.org/rfc/rfc5785).
 
 - [Credential Issuer Metadata](#credential-issuer-metadata) URL: `credential_issuer` + `/.well-known/openid-credential-issuer`
 - [Authorization Server Metadata](#authorization-server-metadata) URL: `credential_issuer` + `/.well-known/oauth-authorization-server`
@@ -370,15 +372,21 @@ URLs to retrieve both [Credential Issuer Metadata](#credential-issuer-metadata) 
 Where `credential_issuer` originates from within the [Credential Offer](#credential-offer) from within the [IDV Request](#idv-request)
 
 #### Credential Issuer Metadata
-| Field                                                                         | Description                                                                                                                                                                                                   | Required | References                                                                                              | Comments                                                                               |
-| :---------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------- | :------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------- |
-| `credential_issuer`                                                           | URL of the Credential Issuer                                                                                                                                                                                  | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.1) | Same value as the `credential_issuer` within the [Credential Offer](#credential-offer) |
-| `credential_endpoint`                                                         | URL for the [Credential Endpoint](#credential-endpoint)                                                                                                                                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.3) |                                                                                        |
-| [`credential_configurations_supported`](#credential_configurations_supported) | Object containing supported credentials where each key corresponds to a value within `credential_configuration_ids` from the [Credential Offer](#credential-offer) and the value defines the given credential | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.3) |                                                                                        |
+
+The Credential Issuer Metadata informs clients of endpoint locations, technical capabilities, supported Credentials, and (internationalized) display information.
+
+| Field                                                                         | Description                                                                                                 | Required | References                                                                                              | Comments                                                                               |
+| :---------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------- |
+| `credential_issuer`                                                           | URL of the Credential Issuer                                                                                | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.1) | Same value as the `credential_issuer` within the [Credential Offer](#credential-offer) |
+| `credential_endpoint`                                                         | URL for the [Credential Endpoint](#credential-endpoint)                                                     | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.3) |                                                                                        |
+| [`credential_configurations_supported`](#credential_configurations_supported) | Object which defines the specifics of the Credential's for which the Credential Issuer supports issuance of | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.3) |                                                                                        |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3)
 
 ##### `credential_configurations_supported`
+
+The `credential_configurations_supported` is an object which defines the specifics of the Credential's for which the Credential Issuer supports issuance of. The `credential_configurations_supported` is a key/value object wherein each key corresponds to a value within the `credential_configuration_ids` from the [Credential Offer](#credential-offer) and the value is defined with the following fields.
+
 | Field                                     | Description                                        | Required | References                                                                                                     | Comments                                                                       |
 | :---------------------------------------- | :------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
 | `format`                                  | Format for the given credential                    | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.2.1)   | MUST be `jwt_vc_json`                                                          |
@@ -389,18 +397,29 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.11.1)
 
 #### Authorization Server Metadata
-| Field            | Description                                               | Required | References                                                         | Comments                          |
-| :--------------- | :-------------------------------------------------------- | :------- | :----------------------------------------------------------------- | :-------------------------------- |
-| `issuer`         | URL of then Credential Issuer                             | y        | [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414#section-2) | Same value as `credential_issuer` |
-| `token_endpoint` | URL for the [Access Token Request](#access-token-request) | y        | [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414#section-2) |                                   |
+
+The Credential Issuer's Authorization Server Metadata informs clients of its endpoint locations and authorization server capabilities.
+
+| Field            | Description                                 | Required | References                                                         | Comments                          |
+| :--------------- | :------------------------------------------ | :------- | :----------------------------------------------------------------- | :-------------------------------- |
+| `issuer`         | URL of then Credential Issuer               | y        | [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414#section-2) | Same value as `credential_issuer` |
+| `token_endpoint` | URL for the [Token Request](#token-request) | y        | [RFC8414](https://datatracker.ietf.org/doc/html/rfc8414#section-2) |                                   |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.3)
 
 [Reference](https://datatracker.ietf.org/doc/html/rfc8414)
 
-### 2. Access Token
+> [!WARNING]
+> TODO we need to consider additional fields, such as `authorization_endpoint` (once we support the Auth Flow) or `response_types_supported`
 
-#### Access Token Request
+### 2. Authorization Endpoints
+
+Clients must authorize with the Credential Issuer prior-to interfacing with the [Issuance Endpoints](#3-issuance-endpoints) as a means of authorizing the Credential Issuer access to the client resources created during the [IDV](#idv) phase.
+
+#### Token Request
+
+Clients must request an access token in order to interface with the [3. Issuance Endpoints](#3-issuance-endpoints).
+
 | Field        | Description                                                                       | Required | References                                                                                                                 | Comments                                                       |
 | :----------- | :-------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
 | `grant_type` |                                                                                   | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-3.5-3)                         | MUST be `urn:ietf:params:oauth:grant-type:pre-authorized_code` |
@@ -411,14 +430,17 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 
 [Reference](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3)
 
-#### Access Token Response
-| Field                | Description                                                                          | Required | References                                                                                           | Comments         |
-| :------------------- | :----------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :--------------- |
-| `access_token`       | The access token granted                                                             | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               |                  |
-| `token_type`         |                                                                                      | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | MUST be `bearer` |
-| `expires_in`         | Seconds from issue until the access token expires                                    | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               |                  |
-| `c_nonce`            | A nonce for use in the subsquent call to [Credential Endpoint](#credential-endpoint) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |                  |
-| `c_nonce_expires_in` | Seconds from issue until the `c_nonce` expires                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.2) |                  |
+#### Token Response
+
+Clients must use the fields from token response in subsequent calls to the [3. Issuance Endpoints](#3-issuance-endpoints).
+
+| Field                | Description                                                                          | Required | References                                                                                           | Comments                                                                                                  |
+| :------------------- | :----------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `access_token`       | The access token granted                                                             | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | `access_token`'s are [JWT Compact Serialized](https://datatracker.ietf.org/doc/html/rfc7515#section-3.1). |
+| `token_type`         |                                                                                      | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | MUST be `bearer`                                                                                          |
+| `expires_in`         | Seconds from issue until the access token expires                                    | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               |                                                                                                           |
+| `c_nonce`            | A nonce for use in the subsquent call to [Credential Endpoint](#credential-endpoint) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |                                                                                                           |
+| `c_nonce_expires_in` | Seconds from issue until the `c_nonce` expires                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.2) |                                                                                                           |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-successful-token-response)
 
@@ -435,6 +457,9 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 > TODO we need to define refresh token flows
 
 ##### `access_token` JOSE Header
+
+The `access_token` granted by the Credential Issuer contains the following [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1) fields.
+
 | Field | Description                                                  | Required | References                                                             | Comments                                         |
 | :---- | :----------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :----------------------------------------------- |
 | `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1) | MUST be `EdDSA` or `ES256K`                      |
@@ -442,6 +467,9 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 | `typ` | (Type) The explicit JWT type                                 | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9) | MUST be `kcc+jwt`                                |
 
 ##### `access_token` Claims
+
+The `access_token` granted by the Credential Issuer contains the following [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) fields.
+
 | Field | Description                                                        | Required | References                                                             | Comments |
 | :---- | :----------------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :------- |
 | `iss` | (Issuer) The DID of the Credential Issuer                          | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1) |          |
@@ -449,7 +477,9 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 | `exp` | (Expiration) The time at which the `access_token` expires          | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4) |          |
 | `iat` | (IssuedAt) The time at which the `access_token` was granted        | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6) |          |
 
-### 3. Issuance
+### 3. Issuance Endpoints
+
+Clients interface with the following endpoints as a means of acquiring the credential.
 
 ```mermaid
 sequenceDiagram
@@ -474,16 +504,22 @@ P->>P: Invalidate preauth code
 ```
 
 #### Credential Request
+
+Clients use the Credential Request to request a credential.
+
 The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Authorization: Bearer {access_token}`)
 
-| Field    | Description                               | Required | References                                                                                             | Comments              |
-| :------- | :---------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------- | :-------------------- |
-| `format` | The format of the credential issued       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.1)   | MUST be `jwt_vc_json` |
-| `proof`  | Proof of possession of DID's private keys | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.2.1) |                       |
+| Field    | Description                                    | Required | References                                                                                             | Comments              |
+| :------- | :--------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------- | :-------------------- |
+| `format` | The format of the credential issued            | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.1)   | MUST be `jwt_vc_json` |
+| `proof`  | Proof of possession of cryptographic materials | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.2.1) |                       |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2)
 
 ##### `proof`
+
+`proof` is an object which contains proof of possession of the client's cryptographic materials.
+
 | Field        | Description       | Required | References                                                                                               | Comments      |
 | :----------- | :---------------- | :------- | :------------------------------------------------------------------------------------------------------- | :------------ |
 | `proof_type` | The type of proof | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.2.2.1) | MUST be `jwt` |
@@ -492,6 +528,9 @@ The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Autho
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2-2.2.1)
 
 ###### `proof.jwt` JOSE Headers
+
+For the client to prove possession of their cryptographic materials, they must construct a JWT with the following [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1) fields.
+
 | Field | Description                                                  | Required | References                                                                                                   | Comments                                         |
 | :---- | :----------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------- | :----------------------------------------------- |
 | `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.1.2.1) | MUST be `EdDSA` or `ES256K`                      |
@@ -501,16 +540,22 @@ The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Autho
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.1.1)
 
 ###### `proof.jwt` Claims
-| Field   | Description                                                                         | Required | References                                                                                                   | Comments |
-| :------ | :---------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------- | :------- |
-| `iss`   | (Issuer) The DID of the customer applying for KCC (Applicant DID)                   | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.1) |          |
-| `aud`   | (Audience) The DID of the Credential Issuer                                         | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.2) |          |
-| `iat`   | (IssuedAt) The time at which the key proof was created                              | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.3) |          |
-| `nonce` | The value of the `c_nonce` from the [Access Token Response](#access-token-response) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.4) |          |
+
+For the client to prove possession of their cryptographic materials, they must construct a JWT with the following [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) fields.
+
+| Field   | Description                                                           | Required | References                                                                                                   | Comments |
+| :------ | :-------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------- | :------- |
+| `iss`   | (Issuer) The DID of the customer applying for KCC (Applicant DID)     | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.1) |          |
+| `aud`   | (Audience) The DID of the Credential Issuer                           | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.2) |          |
+| `iat`   | (IssuedAt) The time at which the key proof was created                | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.3) |          |
+| `nonce` | The value of the `c_nonce` from the [Token Response](#token-response) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.4) |          |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.1)
 
 #### Credential Response
+
+The Credential Issuer will respond to a [Credential Request](#credential-request) with either the credential (in `jwt_vc_json` format) given the Credential Issuer is ready to issue, whereafter the credential may be used for the purpose of providing financial services to that DID in accordance to regulatory requirements, else, given the Credential Issuer is not ready to issue the credential, they must respond with a `transaction_id` which is to be used in a subsequent call in the [Deferred Credential Request](#deferred-credential-request).
+
 | Field            | Description                                                                                | Required | References                                                                                           | Comments                                      |
 | :--------------- | :----------------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------- |
 | `credential`     | The credential in `jwt_vc_json` format                                                     | n        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3-6.1) | If missing, `transaction_id` must be present  |
