@@ -422,27 +422,30 @@ Clients must authorize with the Credential Issuer prior-to interfacing with the 
 
 Clients must request an access token in order to interface with the [3. Issuance Endpoints](#3-issuance-endpoints).
 
-| Field        | Description                                                                       | Required | References                                                                                                                 | Comments                                                       |
-| :----------- | :-------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
-| `grant_type` |                                                                                   | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-3.5-3)                         | MUST be `urn:ietf:params:oauth:grant-type:pre-authorized_code` |
-| `code`       | The value of `pre-authorized_code` from the [Credential Offer](#credential-offer) | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |                                                                |
-| `client_id`  | The client DID                                                                    | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.1-5)                         |                                                                |
+| Field                 | Description                                                                       | Required | References                                                                                                                 | Comments                                                       |
+| :-------------------- | :-------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
+| `grant_type`          |                                                                                   | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-3.5-3)                         | MUST be `urn:ietf:params:oauth:grant-type:pre-authorized_code` |
+| `pre-authorized_code` | The value of `pre-authorized_code` from the [Credential Offer](#credential-offer) | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |                                                                |
+| `client_id`           | The client DID                                                                    | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.1-5)                         |                                                                |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-request)
 
 [Reference](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3)
 
+> [!WARNING]
+> TODO we only support pre-auth flow now, but once we support auth flow then `code` will be used instead of `pre-authorized_code`
+
 #### Token Response
 
 Clients must use the fields from token response in subsequent calls to the [3. Issuance Endpoints](#3-issuance-endpoints).
 
-| Field                | Description                                                                          | Required | References                                                                                           | Comments                                                                                                  |
-| :------------------- | :----------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| Field                | Description                                                                          | Required | References                                                                                           | Comments                                                                                                    |
+| :------------------- | :----------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
 | `access_token`       | The access token granted                                                             | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | `access_token`'s are [Compact Serialized JWT's](https://datatracker.ietf.org/doc/html/rfc7515#section-3.1). |
-| `token_type`         |                                                                                      | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | MUST be `bearer`                                                                                          |
-| `expires_in`         | Seconds from issue until the access token expires                                    | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               |                                                                                                           |
-| `c_nonce`            | A nonce for use in the subsquent call to [Credential Endpoint](#credential-endpoint) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |                                                                                                           |
-| `c_nonce_expires_in` | Seconds from issue until the `c_nonce` expires                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.2) |                                                                                                           |
+| `token_type`         |                                                                                      | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | MUST be `bearer`                                                                                            |
+| `expires_in`         | Seconds from issue until the access token expires                                    | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               |                                                                                                             |
+| `c_nonce`            | A nonce for use in the subsquent call to [Credential Endpoint](#credential-endpoint) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |                                                                                                             |
+| `c_nonce_expires_in` | Seconds from issue until the `c_nonce` expires                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.2) |                                                                                                             |
 
 [Reference](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-successful-token-response)
 
