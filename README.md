@@ -364,7 +364,9 @@ Metadata resources are hosted by the Credential Issuer as a means of informing c
 
 #### Well Known Endpoints
 
-Credential Issuers are required to set up a number of well known endpoints to facilitate authorization, authentication, and credential issuance as follows. URLs to retrieve both [Credential Issuer Metadata](#credential-issuer-metadata) and [Authorization Server Metadata](#authorization-server-metadata) are dynamically constructed by the client [using `.well-known` URI's](https://www.rfc-editor.org/rfc/rfc5785).
+Credential Issuers are required to set up a number of well known endpoints to facilitate authorization and credential issuance as follows. 
+
+URLs to retrieve both [Credential Issuer Metadata](#credential-issuer-metadata) and [Authorization Server Metadata](#authorization-server-metadata) are dynamically constructed by the client [using `.well-known` URI's](https://www.rfc-editor.org/rfc/rfc5785).
 
 - [Credential Issuer Metadata](#credential-issuer-metadata) URL: `credential_issuer` + `/.well-known/openid-credential-issuer`
 - [Authorization Server Metadata](#authorization-server-metadata) URL: `credential_issuer` + `/.well-known/oauth-authorization-server`
@@ -436,7 +438,7 @@ Clients must use the fields from token response in subsequent calls to the [3. I
 
 | Field                | Description                                                                          | Required | References                                                                                           | Comments                                                                                                  |
 | :------------------- | :----------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
-| `access_token`       | The access token granted                                                             | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | `access_token`'s are [JWT Compact Serialized](https://datatracker.ietf.org/doc/html/rfc7515#section-3.1). |
+| `access_token`       | The access token granted                                                             | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | `access_token`'s are [Compact Serialized JWT's](https://datatracker.ietf.org/doc/html/rfc7515#section-3.1). |
 | `token_type`         |                                                                                      | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               | MUST be `bearer`                                                                                          |
 | `expires_in`         | Seconds from issue until the access token expires                                    | y        | [RFC5749](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2)                               |                                                                                                           |
 | `c_nonce`            | A nonce for use in the subsquent call to [Credential Endpoint](#credential-endpoint) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |                                                                                                           |
@@ -455,6 +457,9 @@ Clients must use the fields from token response in subsequent calls to the [3. I
 
 > [!WARNING]
 > TODO we need to define refresh token flows
+
+> [!WARNING]
+> TODO we need to define what our specific policy is for the `c_nonce`
 
 ##### `access_token` JOSE Header
 
