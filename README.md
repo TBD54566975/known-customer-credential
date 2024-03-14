@@ -461,9 +461,6 @@ Clients must use the fields from token response in subsequent calls to the [3. I
 > [!WARNING]
 > TODO we need to define refresh token flows
 
-> [!WARNING]
-> TODO we need to define what our specific policy is for the `c_nonce`
-
 ##### `access_token` JOSE Header
 
 The `access_token` granted by the Credential Issuer contains the following [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1) fields.
