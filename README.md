@@ -460,11 +460,11 @@ Clients must use the fields from token response in subsequent calls to the [3. I
 
 The `access_token` granted by the Credential Issuer contains the following [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1) fields.
 
-| Field | Description                                                  | Required | References                                                             | Comments                                         |
-| :---- | :----------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :----------------------------------------------- |
-| `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1) | MUST be `EdDSA` or `ES256K`                      |
-| `kid` | (KeyID) The fully qualified DID Key ID of the signer         | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4) | In the form `did:{method}:{identifier}#{key_id}` |
-| `typ` | (Type) The explicit JWT type                                 | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9) | MUST be `kcc+jwt`                                |
+| Field | Description                                                  | Required | References                                                             | Comments                                                                                |
+| :---- | :----------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1) | MUST be `EdDSA` or `ES256K`                                                             |
+| `kid` | (KeyID) The fully qualified DID Key ID of the signer         | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4) | In the form `did:{method}:{identifier}#{key_id}`                                        |
+| `typ` | (Type) The explicit JWT type                                 | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9) | MUST be `application/at+jwt` per [RFC9068](https://www.rfc-editor.org/rfc/rfc9068.html) |
 
 ##### `access_token` Claims
 
