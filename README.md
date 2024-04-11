@@ -201,21 +201,23 @@ participant D as Mobile Wallet
 participant P as PFI
 participant I as IDV
 
-Note over D,P: SIOPv2
-D->>+P: Initiate KCC application
-P-->>-D: IDV Request
-
-
-rect rgba(0, 0, 0, 0.3)
-D->>+W: Load URL
-  Note right of I: Collect IDV
-A->>W: Provide identity data
-W->>+I: Applicant identity data
-deactivate W
+rect rgba(0, 0, 0, 0.25)
+    D->>+P: Initiate KCC application
+    Note right of P: SIOPv2
+    P-->>-D: IDV Request
 end
-Note over D,P: Credential Issuance
-D->>+P: Request KCC
-P->>-D: Issue KCC
+rect rgba(0, 0, 0, 0.3)
+    D->>+W: Load URL
+    Note right of I: Collect IDV
+    A->>W: Provide identity data
+    W->>+I: Applicant identity data
+    deactivate W
+end
+rect rgba(0, 0, 0, 0.2)
+    D->>+P: Request KCC
+    Note right of P: Credential Issuance
+    P->>-D: Issue KCC
+end
 ```
 
 ```mermaid
