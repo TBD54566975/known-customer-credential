@@ -17,19 +17,19 @@
     - [Mobile App](#mobile-app)
     - [Web View](#web-view)
 - [Credential Application Flow](#credential-application-flow)
-  - [Initiate SIOPv2 Endpoint](#initiate-siopv2-endpoint)
+  - [Initiate Application](#initiate-application)
     - [Request](#request)
     - [Response](#response)
       - [Client Metadata](#client-metadata)
       - [URI Encoding](#uri-encoding)
-  - [Finalize SIOPv2](#finalize-siopv2)
+  - [Authenticate Applicant DID](#authenticate-applicant-did)
     - [Request](#request-1)
       - [ID Token](#id-token)
     - [Response](#response-1)
       - [Credential Offer](#credential-offer)
       - [Grants](#grants)
       - [Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized\_code](#grant-type-urnietfparamsoauthgrant-typepre-authorized_code)
-  - [IDV](#idv)
+  - [IDV Collection](#idv-collection)
     - [IDV Vendor Collects PII](#idv-vendor-collects-pii)
     - [PFI collects PII](#pfi-collects-pii)
   - [Credential Issuance](#credential-issuance)
@@ -203,14 +203,12 @@ participant I as IDV
 
 rect rgba(0, 0, 0, 0.1)
     D->>+P: Initiate KCC application
-    Note right of I: SIOPv2
-    Note left of W: SIOPv2
+    Note right of I: Initiate Application
     P-->>-D: IDV Request
 end
 rect rgba(0, 0, 0, 0.1)
     D->>+W: Load URL
     Note right of I: Collect IDV
-    Note left of W: Collect IDV
     A->>W: Provide identity data
     W->>+I: Applicant identity data
     deactivate W
@@ -218,10 +216,13 @@ end
 rect rgba(0, 0, 0, 0.1)
     D->>+P: Request KCC
     Note right of I: Credential Issuance
-    Note left of W: Credential Issuance
     P->>-D: Issue KCC
 end
 ```
+
+## Initiate Application
+
+The application flow is initiated with a [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html) interaction that authenticates the applicant's DID.
 
 ```mermaid
 sequenceDiagram
@@ -231,7 +232,7 @@ participant W as Webview
 participant D as Mobile Wallet
 participant P as PFI
 
-D->>+P: GET did:ex:pfi?service=IDV
+D->>+P: GET
 P->>P: Construct SIOPv2 Authorization Request
 P-->>-D: SIOPv2 Authorization Request
 D->>D: Construct SIOPv2 Authorization Response
@@ -243,22 +244,14 @@ D->>W: Load URL in IDV Request
 ```
 
 1. Mobile App resolves the PFI's DID and sends an HTTP GET Request to the `serviceEndpoint` of the first `IDV` service found in the resolved DID Document
-2. PFI constructs a [SIOPv2 Authorization Request](#siopv2-authorization-request)
-3. PFI URI encodes SIOPv2 Authorization Request and returns in HTTP response
-4. Mobile Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#siopv2-authorization-response)
-5. Mobile Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request 
-6. PFI verifies integrity of SIOPv2 Authorization Response and constructs IDV Request
+2. PFI constructs a [SIOPv2 Authorization Request](#response)
+3. PFI URI-encodes SIOPv2 Authorization Request and returns in HTTP response
+4. Mobile Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#request-1)
+5. Mobile Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request
+6. PFI verifies integrity of SIOPv2 Authorization Response and constructs [IDV Request](#response-1)
 7. PFI returns IDV Request in HTTP response
 8. Mobile Wallet verifies integrity of IDV Request
 9. Mobile Wallet loads URL provided in IDV Request in Webview
-
-
-> [!WARNING]
-> I don't know if we're breaking OIDC conformance here by using the response returned by RP to convey use-case specific information
-
-## Initiate SIOPv2 Endpoint
-
-The IDV flow is initiated with a [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html) interaction that authenticates the applicant's DID.
 
 ### Request
 
@@ -304,7 +297,7 @@ The response is a [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2
 
 The SIOPv2 Authorization Request is encoded as a URI before being returned to Mobile Wallet, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
 
-## Finalize SIOPv2
+## Authenticate Applicant DID
 
 ### Request 
 | Field                     | Description                                                                                                        | Required | References                                                                                                                                                     | Comments |
@@ -322,9 +315,10 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 | `nonce` | Nonce MUST match the value of `nonce` from the SIOPv2 Authorization Request                    | y        |            |          |
 | `exp`   | Expiry time                                                                                    | y        |            |          |
 | `iat`   | Issued at time                                                                                 | y        |            |          |
+
 ### Response
 
-The response is an IDV Request
+The response is an IDV Request.
 
 | Field              | Description                     | Required | References                                                                                                                            | Comments                                                                                       |
 | :----------------- | :------------------------------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
@@ -352,7 +346,7 @@ The response is an IDV Request
 > [!WARNING] 
 > TODO: explain rationale behind providing `credential_offer` at this stage
 
-## IDV
+## IDV Collection
 
 > [!IMPORTANT]
 > Whether the PFI is utilizing an IDV vendor is entirely opaque from the originating mobile app's perspective.
