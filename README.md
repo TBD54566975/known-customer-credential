@@ -90,7 +90,8 @@ Integration with IDV vendors happens in 1 of 2 ways:
 2. PII is subsequently sent to the IDV vendor via the backend system for verification
 
 > [!IMPORTANT]
-> Web-based IDV is necessary for reasons that are explained in this document
+> The 2 styles of integration provide flexibility for PFI IDV systems, but they don't impact Mobile Wallets at all. 
+> as a URL to a form that the Applicant completes. 
 
 # Requirements
 This body of work is an extension of the work being done for tbDEX. In effect, this proposal considers the following as requirements:
@@ -98,7 +99,7 @@ This body of work is an extension of the work being done for tbDEX. In effect, t
 
 1. **Must support all IDV flows described in the [IDV Vendor Integrations](#idv-vendor-integrations) section of this document**
 
-Ensuring that this is possible is essential to reduce friction or pain points for financial institutions interested in providing liquidity on tbDEX
+Ensuring that this is possible is essential to reduce friction or pain points for financial institutions interested in providing liquidity on tbDEX.
 
 ---
 
@@ -161,9 +162,9 @@ This implementation involves 3 distinct participants that have different respons
 
 ### PFI
 
-The PFI is operating:
--  A KCC issuer that implements this protocol. The URL of all endpoints is discoverable by resolving PFI's DID Document, and locating the serviceEndpoint of the first `IDV` service
--  A tbDEX service with [Offerings](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) that contain `requiredClaims` presentation definitions. Each presentation definition relates to a KCC that the Issuer is offering.
+The PFI operates a KCC issuer, as well as a tbDEX exchange.
+- The KCC issuer implements this protocol. The URL of all endpoints is discoverable by resolving PFI's DID Document, and locating the serviceEndpoint of the first `IDV` service
+- The tbDEX service has [Offerings](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) that contain `requiredClaims` presentation definitions. Each presentation definition relates to a KCC that the Issuer is offering.
   
 ### Mobile App
 
@@ -263,7 +264,7 @@ An HTTP GET request begins the IDV and KCC issuance flow.
 
 ### Response
 
-The response is a [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-openid-provider-a)
+The response is a [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-openid-provider-a).
 
 | Field                     | Description                                                                                  | Required | References                                                                                                                                                                                   | Comments                                                  |
 | :------------------------ | :------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
@@ -347,6 +348,10 @@ The response is an IDV Request.
 > TODO: explain rationale behind providing `credential_offer` at this stage
 
 ## IDV Collection
+
+The IDV Request sent to the Mobile Wallet contains a `url` field. The Mobile Wallet MUST load this URL in an embedded 
+webview. The Applicant is guided through whatever steps are necessary to collect identity data and submit to the IDV 
+server. The webview MUST close itself when the application steps are complete.
 
 > [!IMPORTANT]
 > Whether the PFI is utilizing an IDV vendor is entirely opaque from the originating mobile app's perspective.
