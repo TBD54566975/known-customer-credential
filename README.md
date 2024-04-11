@@ -13,15 +13,19 @@
   - [Context](#context)
   - [Assumptions](#assumptions)
   - [Participants](#participants)
+    - [PFI](#pfi)
     - [Mobile App](#mobile-app)
     - [Web View](#web-view)
-  - [Initiating IDV Flow](#initiating-idv-flow)
-    - [SIOPv2 Authorization Request](#siopv2-authorization-request)
+- [Credential Application Flow](#credential-application-flow)
+  - [Initiate SIOPv2 Endpoint](#initiate-siopv2-endpoint)
+    - [Request](#request)
+    - [Response](#response)
       - [Client Metadata](#client-metadata)
       - [URI Encoding](#uri-encoding)
-    - [SIOPv2 Authorization Response](#siopv2-authorization-response)
+  - [Finalize SIOPv2](#finalize-siopv2)
+    - [Request](#request-1)
       - [ID Token](#id-token)
-    - [IDV Request](#idv-request)
+    - [Response](#response-1)
       - [Credential Offer](#credential-offer)
       - [Grants](#grants)
       - [Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized\_code](#grant-type-urnietfparamsoauthgrant-typepre-authorized_code)
@@ -155,6 +159,12 @@ Mobile Wallet acts as a **self-custodial** Identity Wallet that:
 
 This implementation involves 3 distinct participants that have different responsibilities:
 
+### PFI
+
+The PFI is operating:
+-  A KCC issuer that implements this protocol. The URL of all endpoints is discoverable by resolving PFI's DID Document, and locating the serviceEndpoint of the first `IDV` service
+-  A tbDEX service with [Offerings](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) that contain `requiredClaims` presentation definitions. Each presentation definition relates to a KCC that the Issuer is offering.
+  
 ### Mobile App
 
 The Mobile app is responsible for:
@@ -179,9 +189,34 @@ The Web view is utilized to:
 > * establish a clear distinction between the application initiating the flow and a PFI
 
 
-## Initiating IDV Flow
+# Credential Application Flow
 
-Initiating the IDV flow is done using [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html).
+```mermaid
+sequenceDiagram
+autonumber
+
+actor A as Applicant
+participant W as Webview
+participant D as Mobile Wallet
+participant P as PFI
+participant I as IDV
+
+Note over D,P: SIOPv2
+D->>+P: Initiate KCC application
+P-->>-D: IDV Request
+
+
+rect rgba(0, 0, 0, 0.3)
+D->>+W: Load URL
+  Note right of I: Collect IDV
+A->>W: Provide identity data
+W->>+I: Applicant identity data
+deactivate W
+end
+Note over D,P: Credential Issuance
+D->>+P: Request KCC
+P->>-D: Issue KCC
+```
 
 ```mermaid
 sequenceDiagram
@@ -216,11 +251,25 @@ D->>W: Load URL in IDV Request
 > [!WARNING]
 > I don't know if we're breaking OIDC conformance here by using the response returned by RP to convey use-case specific information
 
-### SIOPv2 Authorization Request
+## Initiate SIOPv2 Endpoint
+
+The IDV flow is initiated with a [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html) interaction that authenticates the applicant's DID.
+
+### Request
+
+An HTTP GET request begins the IDV and KCC issuance flow.
+
+| Query Parameter              | Description                                                          | Required | References                                                                                              | Comments                                            |
+| :--------------------------- | :------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------ | :-------------------------------------------------- |
+| `presentation_definition_id` | The ID of a presentation definition describing the KCC to be issued. | n        | [tbDEX Offering requiredClaims](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) | If not provided, the PFI chooses which KCC to issue |
+
+### Response
+
+The response is a [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-openid-provider-a)
 
 | Field                     | Description                                                                                  | Required | References                                                                                                                                                                                   | Comments                                                  |
 | :------------------------ | :------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| `client_id`               | The DID of the RP, which is us (the PFI)                                                     | y        |                                                                                                                                                                                              |                                                           |
+| `client_id`               | The DID of the Relying Party (the PFI)                                                       | y        |                                                                                                                                                                                              |                                                           |
 | `scope`                   | What's being requested. 'openid' indicates ID Token is being requested                       | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                    |                                                           |
 | `response_type`           | What sort of response the RP is expecting. MUST include `id_token`. MAY include `vp_token`   | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                 |                                                           |
 | `response_uri`            | The URI to which the SIOPv2 Authorization Response will be sent                              | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-7.2)                                                                                                |                                                           |
@@ -250,8 +299,9 @@ D->>W: Load URL in IDV Request
 
 The SIOPv2 Authorization Request is encoded as a URI before being returned to Mobile Wallet, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
 
-### SIOPv2 Authorization Response
+## Finalize SIOPv2
 
+### Request 
 | Field                     | Description                                                                                                        | Required | References                                                                                                                                                     | Comments |
 | :------------------------ | :----------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
 | `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Authorization Request                                       | y        | [JWT](https://www.rfc-editor.org/info/rfc7519) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
@@ -267,8 +317,10 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 | `nonce` | Nonce MUST match the value of `nonce` from the SIOPv2 Authorization Request                    | y        |            |          |
 | `exp`   | Expiry time                                                                                    | y        |            |          |
 | `iat`   | Issued at time                                                                                 | y        |            |          |
+### Response
 
-### IDV Request
+The response is an IDV Request
+
 | Field              | Description                     | Required | References                                                                                                                            | Comments                                                                                       |
 | :----------------- | :------------------------------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
 | `url`              | URL of form used to collect PII | y        |                                                                                                                                       | Required for now until we figure out how to support exclusively providing credentials as input |
@@ -305,14 +357,14 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 sequenceDiagram
 autonumber
 
-actor A as Alice 
-participant D as Mobile Wallet
+actor A as Applicant 
 participant W as Webview
+participant D as Mobile Wallet
 participant P as PFI
 participant V as IDV Vendor
 
 
-W->>W: Load URL
+D->>W: Load URL
 A->>W: Provide PII, Submit
 W->>V: PII
 V->>V: Process
@@ -325,13 +377,13 @@ W->>W: Close
 sequenceDiagram
 autonumber
 
-actor A as Alice 
-participant D as Mobile Wallet
+actor A as Applicant 
 participant W as Webview
+participant D as Mobile Wallet
 participant P as PFI
 
 
-W->>W: Load URL
+D->>W: Load URL
 loop until 200 response
     A->>W: Provide PII, Submit
     W->>P: PII
