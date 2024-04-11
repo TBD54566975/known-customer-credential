@@ -90,8 +90,8 @@ Integration with IDV vendors happens in 1 of 2 ways:
 2. PII is subsequently sent to the IDV vendor via the backend system for verification
 
 > [!IMPORTANT]
-> The 2 styles of integration provide flexibility for PFI IDV systems, but they don't impact Mobile Wallets at all. 
-> as a URL to a form that the Applicant completes. 
+> The 2 styles of integration provide flexibility for PFI IDV systems, but they don't impact Mobile Wallets at all, as
+> they have the same external behaviour. 
 
 # Requirements
 This body of work is an extension of the work being done for tbDEX. In effect, this proposal considers the following as requirements:
@@ -398,6 +398,9 @@ W->>W: Close
 ```
 
 ## Credential Issuance
+
+Credential Issuance is an [OID4VCI Pre-Authorized Code flow](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#name-pre-authorized-code-flow). 
+The `pre-authorized_code` from the IDV Request can be exchanged for an Access Token via the Token Endpoint.  
 
 ```mermaid
 sequenceDiagram
