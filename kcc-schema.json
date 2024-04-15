@@ -6,7 +6,8 @@
          "type":"object",
          "properties":{
             "id":{
-               "type":"string"
+               "type":"string",
+               "pattern":"^did:[a-z0-9]+:[a-zA-Z0-9.-_:]+$"
             },
             "country_of_residence":{
                "type":"string",
@@ -22,7 +23,8 @@
          ]
       },
       "issuer":{
-         "type":"string"
+         "type":"string",
+         "pattern":"^did:[a-z0-9]+:[a-zA-Z0-9.-_:]+$"
       },
       "issuanceDate":{
          "type":"string",
@@ -40,7 +42,8 @@
                "format":"uri"
             },
             "type":{
-               "type":"string"
+               "type":"string",
+               "const":"JsonSchema"
             }
          },
          "required":[
