@@ -163,9 +163,7 @@ This implementation involves 3 distinct participants that have different respons
 
 ### PFI
 
-The PFI operates a KCC issuer, as well as a liquidity provider via tbDEX.
-- The KCC issuer implements this protocol. 
-- The liquidity provider has [tbDEX Offerings](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) that contain `requiredClaims` presentation definitions. Each presentation definition relates to a credential that the KCC Issuer is offering.
+The PFI operates an Issuer, implementing this protocol. 
   
 ### Mobile App
 
