@@ -222,7 +222,7 @@ end
 rect rgba(0, 0, 0, 0.1)
     D->>+P: Request KCC
     Note right of I: Credential Issuance
-    P->>-D: Issue KCC
+    P-->>-D: Issue KCC
 end
 ```
 
