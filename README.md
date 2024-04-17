@@ -194,7 +194,7 @@ The Web view is utilized to:
 
 Financial service providers often perform KYC incrementally in response to customer's expressed intent to access services. For example, minimal upfront diligence on newly onboarded customers, followed by additional diligence when the customer's activity passes a threshold.
 
-A KCC Issuer may define multiple KCC types to represent different levels of KYC diligence, and describe each with a Presentation Definition. Mobile Apps who hold a KCC already may apply for new credentials to acquire a higher level KCC (see [Initiate Application](#request)) 
+A KCC Issuer may define multiple KCC types to represent different levels of KYC diligence, and describe each with a Presentation Definition. Mobile Apps which hold a previously issued KCC may apply for new credentials to acquire a higher level KCC (see [Initiate Application](#request)) 
 
 # Credential Application Flow
 
