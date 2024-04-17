@@ -261,9 +261,9 @@ D->>W: Load URL in IDV Request
 
 An HTTP GET request begins the IDV and KCC issuance flow.
 
-| Query Parameter              | Description                                                          | Required | References                                                                                              | Comments                                            |
-| :--------------------------- | :------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------ | :-------------------------------------------------- |
-| `presentation_definition_id` | The ID of a presentation definition describing the KCC to be issued. | n        | [tbDEX Offering requiredClaims](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) | If not provided, the PFI chooses which KCC to issue |
+| Query Parameter              | Description                                                          | Required | References                                                                                                                                                                                                                         | Comments                                            |
+| :--------------------------- | :------------------------------------------------------------------- | :------- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| :-------------------------------------------------- |
+| `presentation_definition_id` | The ID of a presentation definition describing the KCC to be issued. | n        | [Presentation&nbsp;Exchange&nbsp;2.0.0](https://identity.foundation/presentation-exchange/spec/v2.0.0/#presentation-definition) [tbDEX&nbsp;Offering](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) | If not provided, the PFI chooses which KCC to issue |
 
 ### Response
 
