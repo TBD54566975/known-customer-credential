@@ -13,19 +13,24 @@
   - [Context](#context)
   - [Assumptions](#assumptions)
   - [Participants](#participants)
+    - [PFI](#pfi)
     - [Mobile App](#mobile-app)
     - [Web View](#web-view)
-  - [Initiating IDV Flow](#initiating-idv-flow)
-    - [SIOPv2 Authorization Request](#siopv2-authorization-request)
+  - [Multiple Credential Types](#multiple-credential-types)
+- [Credential Application Flow](#credential-application-flow)
+  - [Initiate Application](#initiate-application)
+    - [Request](#request)
+    - [Response](#response)
       - [Client Metadata](#client-metadata)
       - [URI Encoding](#uri-encoding)
-    - [SIOPv2 Authorization Response](#siopv2-authorization-response)
+  - [Authenticate Applicant DID](#authenticate-applicant-did)
+    - [Request](#request-1)
       - [ID Token](#id-token)
-    - [IDV Request](#idv-request)
+    - [Response](#response-1)
       - [Credential Offer](#credential-offer)
       - [Grants](#grants)
       - [Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized\_code](#grant-type-urnietfparamsoauthgrant-typepre-authorized_code)
-  - [IDV](#idv)
+  - [IDV Collection](#idv-collection)
     - [IDV Vendor Collects PII](#idv-vendor-collects-pii)
     - [PFI collects PII](#pfi-collects-pii)
   - [Credential Issuance](#credential-issuance)
@@ -86,7 +91,8 @@ Integration with IDV vendors happens in 1 of 2 ways:
 2. PII is subsequently sent to the IDV vendor via the backend system for verification
 
 > [!IMPORTANT]
-> Web-based IDV is necessary for reasons that are explained in this document
+> The 2 styles of integration provide flexibility for PFI identity verification systems, but they don't impact Mobile Apps at all, as
+> they have the same external behaviour. 
 
 # Requirements
 This body of work is an extension of the work being done for tbDEX. In effect, this proposal considers the following as requirements:
@@ -94,7 +100,7 @@ This body of work is an extension of the work being done for tbDEX. In effect, t
 
 1. **Must support all IDV flows described in the [IDV Vendor Integrations](#idv-vendor-integrations) section of this document**
 
-Ensuring that this is possible is essential to reduce friction or pain points for financial institutions interested in providing liquidity on tbDEX
+Ensuring that this is possible is essential to reduce friction or pain points for financial institutions interested in providing liquidity on tbDEX.
 
 ---
 
@@ -134,14 +140,14 @@ Interoperability is critical for the ecosystem as a whole. This is also an impli
 Concretely, the objective is to implement a solution that allows a mobile application to initiate an IDV flow with a PFI used to perform KYC that results in a Known Customer Credential issued by the PFI. This KCC can be presented by the holder to the PFI to utilize financial services (e.g. tbDEX value exchange)
 
 ## Context
-As a means to provide clarity, many of the examples in this section will refer to an imaginary mobile application named Mobile Wallet.
+As a means to provide clarity, many of the examples in this section will refer to an imaginary mobile application named Mobile App.
 
-Mobile Wallet is a mobile application that can be used by individuals to:
+Mobile App is a mobile application that can be used by individuals to:
 * Purchase Stablecoin using fiat currency from a PFI via tbDEX. The PFI acts as the custodian of the purchased Stablecoin
 * Send custodied Stablecoin to anyone via tbDEX
 * Sell Stablecoin for fiat currency through a PFI via tbDEX.
 
-Mobile Wallet acts as a **self-custodial** Identity Wallet that:
+Mobile App acts as a **self-custodial** Identity Wallet that:
 * creates a DID for each individual and securely stores private keys directly on device. 
 * stores Verifiable Credentials issued to the user directly on device
 
@@ -155,6 +161,10 @@ Mobile Wallet acts as a **self-custodial** Identity Wallet that:
 
 This implementation involves 3 distinct participants that have different responsibilities:
 
+### PFI
+
+The PFI operates an Issuer, implementing this protocol. 
+  
 ### Mobile App
 
 The Mobile app is responsible for:
@@ -178,20 +188,55 @@ The Web view is utilized to:
 > * prevents Wallets / Mobile Apps from having to update source code in order to integrate with different PFIs
 > * establish a clear distinction between the application initiating the flow and a PFI
 
+## Multiple Credential Types
 
-## Initiating IDV Flow
+Financial service providers often perform KYC incrementally in response to customer's expressed intent to access services. For example, minimal upfront diligence on newly onboarded customers, followed by additional diligence when the customer's activity passes a threshold.
 
-Initiating the IDV flow is done using [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html).
+A KCC Issuer may define multiple KCC types to represent different levels of KYC diligence, and describe each with a Presentation Definition. Mobile Apps which hold a previously issued KCC may apply for new credentials to acquire a higher level KCC (see [Initiate Application](#request)) 
+
+# Credential Application Flow
+
+```mermaid
+sequenceDiagram
+
+actor A as Applicant
+participant W as Webview
+participant D as Mobile App
+participant P as PFI
+participant I as IDV
+
+rect rgba(0, 0, 0, 0.1)
+    D->>+P: Initiate KCC application
+    Note right of I: Initiate Application
+    P-->>-D: IDV Request
+end
+rect rgba(0, 0, 0, 0.1)
+    D->>+W: Load URL
+    Note right of I: Collect IDV
+    A->>W: Provide identity data
+    W->>+I: Applicant identity data
+    deactivate W
+end
+rect rgba(0, 0, 0, 0.1)
+    D->>+P: Request KCC
+    Note right of I: Credential Issuance
+    P-->>-D: Issue KCC
+end
+```
+
+## Initiate Application
+
+The application flow is initiated with a [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html) interaction that authenticates the applicant's DID.
 
 ```mermaid
 sequenceDiagram
 autonumber
 
 participant W as Webview
-participant D as Mobile Wallet
+participant D as Mobile App
 participant P as PFI
 
-D->>+P: GET did:ex:pfi?service=IDV
+D->>+P: GET
 P->>P: Construct SIOPv2 Authorization Request
 P-->>-D: SIOPv2 Authorization Request
 D->>D: Construct SIOPv2 Authorization Response
@@ -203,24 +248,30 @@ D->>W: Load URL in IDV Request
 ```
 
 1. Mobile App resolves the PFI's DID and sends an HTTP GET Request to the `serviceEndpoint` of the first `IDV` service found in the resolved DID Document
-2. PFI constructs a [SIOPv2 Authorization Request](#siopv2-authorization-request)
-3. PFI URI encodes SIOPv2 Authorization Request and returns in HTTP response
-4. Mobile Wallet verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#siopv2-authorization-response)
-5. Mobile Wallet POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request 
-6. PFI verifies integrity of SIOPv2 Authorization Response and constructs IDV Request
+2. PFI constructs a [SIOPv2 Authorization Request](#response)
+3. PFI URI-encodes SIOPv2 Authorization Request and returns in HTTP response
+4. Mobile App verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#request-1)
+5. Mobile App POSTs SIOPv2 Authorization Response to the `response_uri` from the SIOPv2 Authorization Request
+6. PFI verifies integrity of SIOPv2 Authorization Response and constructs [IDV Request](#response-1)
 7. PFI returns IDV Request in HTTP response
-8. Mobile Wallet verifies integrity of IDV Request
-9. Mobile Wallet loads URL provided in IDV Request in Webview
+8. Mobile App verifies integrity of IDV Request
+9. Mobile App loads URL provided in IDV Request in Webview
 
+### Request
 
-> [!WARNING]
-> I don't know if we're breaking OIDC conformance here by using the response returned by RP to convey use-case specific information
+An HTTP GET request begins the IDV and KCC issuance flow.
 
-### SIOPv2 Authorization Request
+| Query Parameter              | Description                                                          | Required | References                                                                                                                                                                                                                         | Comments                                            |
+| :--------------------------- | :------------------------------------------------------------------- | :------- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| :-------------------------------------------------- |
+| `presentation_definition_id` | The ID of a presentation definition describing the KCC to be issued. | n        | [Presentation&nbsp;Exchange&nbsp;2.0.0](https://identity.foundation/presentation-exchange/spec/v2.0.0/#presentation-definition) [tbDEX&nbsp;Offering](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) | If not provided, the PFI chooses which KCC to issue |
+
+### Response
+
+The response is a [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-openid-provider-a).
 
 | Field                     | Description                                                                                  | Required | References                                                                                                                                                                                   | Comments                                                  |
 | :------------------------ | :------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| `client_id`               | The DID of the RP, which is us (the PFI)                                                     | y        |                                                                                                                                                                                              |                                                           |
+| `client_id`               | The DID of the Relying Party (the PFI)                                                       | y        |                                                                                                                                                                                              |                                                           |
 | `scope`                   | What's being requested. 'openid' indicates ID Token is being requested                       | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                    |                                                           |
 | `response_type`           | What sort of response the RP is expecting. MUST include `id_token`. MAY include `vp_token`   | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                 |                                                           |
 | `response_uri`            | The URI to which the SIOPv2 Authorization Response will be sent                              | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-7.2)                                                                                                |                                                           |
@@ -248,10 +299,13 @@ D->>W: Load URL in IDV Request
 
 #### URI Encoding
 
-The SIOPv2 Authorization Request is encoded as a URI before being returned to Mobile Wallet, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
+The SIOPv2 Authorization Request is encoded as a URI before being returned to Mobile App, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
 
-### SIOPv2 Authorization Response
+## Authenticate Applicant DID
 
+The Mobile App responds with a [Cross-Device SIOPv2 Authorization Response](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-cross-device-self-issued-open). 
+
+### Request 
 | Field                     | Description                                                                                                        | Required | References                                                                                                                                                     | Comments |
 | :------------------------ | :----------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
 | `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Authorization Request                                       | y        | [JWT](https://www.rfc-editor.org/info/rfc7519) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
@@ -268,7 +322,10 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 | `exp`   | Expiry time                                                                                    | y        |            |          |
 | `iat`   | Issued at time                                                                                 | y        |            |          |
 
-### IDV Request
+### Response
+
+The response is an IDV Request.
+
 | Field              | Description                     | Required | References                                                                                                                            | Comments                                                                                       |
 | :----------------- | :------------------------------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------- |
 | `url`              | URL of form used to collect PII | y        |                                                                                                                                       | Required for now until we figure out how to support exclusively providing credentials as input |
@@ -277,25 +334,29 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 #### Credential Offer
 | Field                          | Description                                                                                                                                                         | Required | References                                                                                                             | Comments |
 | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------- | :--------------------------------------------------------------------------------------------------------------------- | :------- |
-| `credential_issuer`            | The URL of the Credential Issuer that the Mobile Wallet will interact with in subsequent steps                                                                      | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.1) |          |
-| `credential_configuration_ids` | Array of unique strings that each identify a credential being offered. Mobile Wallet can use these to request metadata                                              | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.2) |          |
+| `credential_issuer`            | The URL of the Credential Issuer that the Mobile App will interact with in subsequent steps                                                                      | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.1) |          |
+| `credential_configuration_ids` | Array of unique strings that each identify a credential being offered. Mobile App can use these to request metadata                                              | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.2) |          |
 | `grants`                       | Object containing Grant Types that the Credential Issuer will accept for this credential offer. MUST contain `urn:ietf:params:oauth:grant-type:pre-authorized_code` | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.3) |          |
 
 #### Grants 
 | Field                                                  | Description                                                                                             | Required | References                                                                                                               | Comments |
 | :----------------------------------------------------- | :------------------------------------------------------------------------------------------------------ | :------- | :----------------------------------------------------------------------------------------------------------------------- | :------- |
-| `urn:ietf:params:oauth:grant-type:pre-authorized_code` | Grant Type that allows the Mobile Wallet to follow a Pre-Authorized Code Flow to collect the credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.1) |          |
+| `urn:ietf:params:oauth:grant-type:pre-authorized_code` | Grant Type that allows the Mobile App to follow a Pre-Authorized Code Flow to collect the credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.1) |          |
 
 
 #### Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized_code
 | Field                 | Description                                                                                              | Required | References                                                                                                                 | Comments |
 | :-------------------- | :------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------- |
-| `pre-authorized_code` | The code representing the Credential Issuer's authorization for the Mobile Wallet to obtain a credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |          |
+| `pre-authorized_code` | The code representing the Credential Issuer's authorization for the Mobile App to obtain a credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |          |
 
 > [!WARNING] 
 > TODO: explain rationale behind providing `credential_offer` at this stage
 
-## IDV
+## IDV Collection
+
+The IDV Request sent to the Mobile App contains a `url` field. The Mobile App MUST load this URL in an embedded 
+webview. The Applicant is guided through whatever steps are necessary to collect identity data and submit to the IDV 
+server. The webview MUST close itself when the application steps are complete.
 
 > [!IMPORTANT]
 > Whether the PFI is utilizing an IDV vendor is entirely opaque from the originating mobile app's perspective.
@@ -305,14 +366,14 @@ The SIOPv2 Authorization Request is encoded as a URI before being returned to Mo
 sequenceDiagram
 autonumber
 
-actor A as Alice 
-participant D as Mobile Wallet
+actor A as Applicant 
 participant W as Webview
+participant D as Mobile App
 participant P as PFI
 participant V as IDV Vendor
 
 
-W->>W: Load URL
+D->>W: Load URL
 A->>W: Provide PII, Submit
 W->>V: PII
 V->>V: Process
@@ -325,13 +386,13 @@ W->>W: Close
 sequenceDiagram
 autonumber
 
-actor A as Alice 
-participant D as Mobile Wallet
+actor A as Applicant 
 participant W as Webview
+participant D as Mobile App
 participant P as PFI
 
 
-W->>W: Load URL
+D->>W: Load URL
 loop until 200 response
     A->>W: Provide PII, Submit
     W->>P: PII
@@ -343,11 +404,14 @@ W->>W: Close
 
 ## Credential Issuance
 
+Credential Issuance is an [OID4VCI Pre-Authorized Code flow](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#name-pre-authorized-code-flow). 
+The `pre-authorized_code` from the IDV Request can be exchanged for an Access Token via the Token Endpoint.  
+
 ```mermaid
 sequenceDiagram
 autonumber
 
-participant D as Mobile Wallet
+participant D as Mobile App
 participant P as PFI
 
 D->>+P: Fetch metadata
@@ -478,7 +542,7 @@ Clients interface with the following endpoints as a means of acquiring the crede
 sequenceDiagram
 autonumber
 
-participant D as Mobile Wallet
+participant D as Mobile App
 participant P as PFI
 participant V as IDV Vendor
 
