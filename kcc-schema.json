@@ -9,7 +9,7 @@
                "type":"string",
                "pattern":"^did:[a-z0-9]+:[a-zA-Z0-9.-_:]+$"
             },
-            "country_of_residence":{
+            "countryOfResidence":{
                "type":"string",
                "pattern":"^[A-Z]{2}$"
             },
@@ -19,7 +19,7 @@
          },
          "required":[
             "id",
-            "country_of_residence"
+            "countryOfResidence"
          ]
       },
       "issuer":{
