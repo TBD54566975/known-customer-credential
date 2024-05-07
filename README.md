@@ -265,8 +265,8 @@ D->>W: Load URL in IDV Request
 
 An HTTP GET request begins the IDV and KCC issuance flow.
 
-| Query Parameter              | Description                                                          | Required | References                                                                                                                                                                                                                         | Comments                                            |
-| :--------------------------- | :------------------------------------------------------------------- | :------- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| :-------------------------------------------------- |
+| Query Parameter              | Description                                                          | Required | References                                                                                                                                                                                                                    | Comments                                            |
+| :--------------------------- | :------------------------------------------------------------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
 | `presentation_definition_id` | The ID of a presentation definition describing the KCC to be issued. | n        | [Presentation&nbsp;Exchange&nbsp;2.0.0](https://identity.foundation/presentation-exchange/spec/v2.0.0/#presentation-definition) [tbDEX&nbsp;Offering](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) | If not provided, the PFI chooses which KCC to issue |
 
 ### Response
@@ -338,19 +338,19 @@ The response is an IDV Request.
 #### Credential Offer
 | Field                          | Description                                                                                                                                                         | Required | References                                                                                                             | Comments |
 | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------- | :--------------------------------------------------------------------------------------------------------------------- | :------- |
-| `credential_issuer`            | The URL of the Credential Issuer that the Mobile App will interact with in subsequent steps                                                                      | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.1) |          |
-| `credential_configuration_ids` | Array of unique strings that each identify a credential being offered. Mobile App can use these to request metadata                                              | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.2) |          |
+| `credential_issuer`            | The URL of the Credential Issuer that the Mobile App will interact with in subsequent steps                                                                         | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.1) |          |
+| `credential_configuration_ids` | Array of unique strings that each identify a credential being offered. Mobile App can use these to request metadata                                                 | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.2) |          |
 | `grants`                       | Object containing Grant Types that the Credential Issuer will accept for this credential offer. MUST contain `urn:ietf:params:oauth:grant-type:pre-authorized_code` | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-2.3) |          |
 
 #### Grants 
-| Field                                                  | Description                                                                                             | Required | References                                                                                                               | Comments |
-| :----------------------------------------------------- | :------------------------------------------------------------------------------------------------------ | :------- | :----------------------------------------------------------------------------------------------------------------------- | :------- |
+| Field                                                  | Description                                                                                          | Required | References                                                                                                               | Comments |
+| :----------------------------------------------------- | :--------------------------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------------------- | :------- |
 | `urn:ietf:params:oauth:grant-type:pre-authorized_code` | Grant Type that allows the Mobile App to follow a Pre-Authorized Code Flow to collect the credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.1) |          |
 
 
 #### Grant Type: urn:ietf:params:oauth:grant-type:pre-authorized_code
-| Field                 | Description                                                                                              | Required | References                                                                                                                 | Comments |
-| :-------------------- | :------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------- |
+| Field                 | Description                                                                                           | Required | References                                                                                                                 | Comments |
+| :-------------------- | :---------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------- |
 | `pre-authorized_code` | The code representing the Credential Issuer's authorization for the Mobile App to obtain a credential | y        | [OID4VCI](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#section-4.1.1-4.2.2.1) |          |
 
 > [!WARNING] 
@@ -507,6 +507,9 @@ Clients must use the fields from token response in subsequent calls to the [3. I
 | `c_nonce`            | A nonce for use in the subsquent call to [Credential Endpoint](#credential-endpoint) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |                                                                                                             |
 | `c_nonce_expires_in` | Seconds from issue until the `c_nonce` expires                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.2) |                                                                                                             |
 
+Additionally the token response MUST contain HTTP headers "Cache-Control: no-store" and "Pragma: no-cache" as per [RC6749](https://www.rfc-editor.org/rfc/rfc6749.html#section-5.1)
+
+
 > [!WARNING]
 > TODO we need to define error responses https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2.1
 > 
@@ -521,22 +524,27 @@ Clients must use the fields from token response in subsequent calls to the [3. I
 
 The `access_token` granted by the Credential Issuer contains the following [JOSE Header](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1) fields.
 
-| Field | Description                                                  | Required | References                                                             | Comments                                                                                |
-| :---- | :----------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
-| `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1) | MUST be `EdDSA` or `ES256K`                                                             |
-| `kid` | (KeyID) The fully qualified DID Key ID of the signer         | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4) | In the form `did:{method}:{identifier}#{key_id}`                                        |
-| `typ` | (Type) The explicit JWT type                                 | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9) | MUST be `application/at+jwt` per [RFC9068](https://www.rfc-editor.org/rfc/rfc9068.html) |
+| Field | Description                                                  | Required | References                                                             | Comments                                                                    |
+| :---- | :----------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| `alg` | (Algorithm) The cryptographic algorithm used to sign the JWT | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.1) | MUST be `EdDSA` or `ES256K`                                                 |
+| `kid` | (KeyID) The fully qualified DID Key ID of the signer         | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4) | In the form `did:{method}:{identifier}#{key_id}`                            |
+| `typ` | (Type) The explicit JWT type                                 | y        | [RFC7515](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9) | MUST be `at+jwt` per [RFC9068](https://www.rfc-editor.org/rfc/rfc9068.html) |
 
 ##### `access_token` Claims
 
 The `access_token` granted by the Credential Issuer contains the following [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) fields.
 
-| Field | Description                                                        | Required | References                                                             | Comments |
-| :---- | :----------------------------------------------------------------- | :------- | :--------------------------------------------------------------------- | :------- |
-| `iss` | (Issuer) The DID of the Credential Issuer                          | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1) |          |
-| `sub` | (Subject) The DID of the customer applying for KCC (Applicant DID) | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2) |          |
-| `exp` | (Expiration) The time at which the `access_token` expires          | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4) |          |
-| `iat` | (IssuedAt) The time at which the `access_token` was granted        | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6) |          |
+| Field            | Description                                                          | Required | References                                                                                           | Comments |
+| :--------------- | :------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :------- |
+| `iss`            | (Issuer) The DID of the Authorization Server                         | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1)                               |          |
+| `aud`            | (Audience) The Resource Identifier of the Credential Issuer          | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3)                               |          |
+| `sub`            | (Subject) The DID of the customer applying for KCC (Applicant DID)   | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2)                               |          |
+| `client_id`      | (Client ID) The DID of the customer applying for KCC (Applicant DID) | y        | [RFC8693](https://www.rfc-editor.org/rfc/rfc8693#section-4.3)                                        |          |
+| `exp`            | (Expiration) The time at which the `access_token` expires            | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4)                               |          |
+| `iat`            | (IssuedAt) The time at which the `access_token` was granted          | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6)                               |          |
+| `jti`            | (JWT ID) A unique identifier for the token                           | y        | [RFC7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7)                               |          |
+| `c_nonce`        | A nonce to be used in the [Proof JWT](#proofjwt-claims)              | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |          |
+| `c_nonce_expiry` | Expiry time of the c_nonce                                           | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |          |
 
 ### 3. Issuance Endpoints
 
