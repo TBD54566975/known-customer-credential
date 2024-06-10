@@ -22,8 +22,10 @@
   - [Initiate Application](#initiate-application)
     - [Request](#request)
     - [Response](#response)
-      - [Client Metadata](#client-metadata)
       - [URI Encoding](#uri-encoding)
+      - [SIOPv2 Authorization Request](#siopv2-authorization-request)
+      - [Client Metadata](#client-metadata)
+      - [Examples](#examples)
   - [Authenticate Applicant DID](#authenticate-applicant-did)
     - [Request](#request-1)
       - [ID Token](#id-token)
@@ -267,24 +269,40 @@ An HTTP GET request begins the IDV and KCC issuance flow.
 
 | Query Parameter              | Description                                                          | Required | References                                                                                                                                                                                                                    | Comments                                            |
 | :--------------------------- | :------------------------------------------------------------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
-| `presentation_definition_id` | The ID of a presentation definition describing the KCC to be issued. | n        | [Presentation&nbsp;Exchange&nbsp;2.0.0](https://identity.foundation/presentation-exchange/spec/v2.0.0/#presentation-definition) [tbDEX&nbsp;Offering](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) | If not provided, the PFI chooses which KCC to issue |
+| `presentation_definition_id` | The ID of a presentation definition describing the KCC to be issued. | n        | [Presentation&nbsp;Exchange&nbsp;2.0.0](https://identity.foundation/presentation-exchange/spec/v2.0.0/#presentation-definition), [tbDEX&nbsp;Offering](https://github.com/TBD54566975/tbdex/tree/main/specs/protocol#offering) | If not provided, the PFI chooses which KCC to issue |
 
 ### Response
 
-The response is a [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-openid-provider-a).
+The response is a [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-openid-provider-a), 
+which is sent as a [JWT-Secured Authorization Request (JAR)](https://www.rfc-editor.org/rfc/rfc9101.html#name-authorization-request). 
+It may be returned as EITHER "request by value" or "request by reference".
 
-| Field                     | Description                                                                                  | Required | References                                                                                                                                                                                   | Comments                                                  |
-| :------------------------ | :------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| `client_id`               | The DID of the Relying Party (the PFI)                                                       | y        |                                                                                                                                                                                              |                                                           |
-| `scope`                   | What's being requested. 'openid' indicates ID Token is being requested                       | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                    |                                                           |
-| `response_type`           | What sort of response the RP is expecting. MUST include `id_token`. MAY include `vp_token`   | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                 |                                                           |
-| `response_uri`            | The URI to which the SIOPv2 Authorization Response will be sent                              | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-7.2)                                                                                                |                                                           |
-| `response_mode`           | The mode in which the SIOPv2 Authorization Response will be sent. MUST be `direct_post`      | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-1)                                                                                                  |                                                           |
-| `presentation_definition` | Used by PFI to request VCs as input to IDV process                                           | n        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-presentation_definition-par)                                                                               | If present, Response Type `vp_token` MUST also be present |
-| `nonce`                   | A nonce which MUST be included in the ID Token provided in the SIOPv2 Authorization Response | y        |                                                                                                                                                                                              |                                                           |
-| `client_metadata`         | A JSON object containing the Verifier metadata values                                        | y        | [OIDC](https://openid.net/specs/openid-connect-registration-1_0.html) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-relying-party-client-metada) |                                                           |
+| Field         | Description                                                                                                                     | Required | References                                                                                                                         | Comments |
+| :------------ | :------------------------------------------------------------------------------------------------------------------------------ | :------- | :--------------------------------------------------------------------------------------------------------------------------------- | :------- |
+| `client_id`   | The DID of the Relying Party (the PFI)                                                                                          | y        | [RFC9101](https://www.rfc-editor.org/rfc/rfc9101.html#section-5-2.6)                                                               |
+| `request`     | [URI encoded](#uri-encoding) JAR value of the SIOPv2 Authorization Request, if request by value is used                         | n        | [SIOPv2 Authorization Request](#siopv2-authorization-request), [RFC9101](https://www.rfc-editor.org/rfc/rfc9101.html#section-5-2.2) |
+| `request_uri` | Absolute URI of an endpoint that will return the JAR value of the SIOPv2 Authorization Request, if request by reference is used | n        | [SIOPv2 Authorization Request](#siopv2-authorization-request), [RFC9101](https://www.rfc-editor.org/rfc/rfc9101.html#section-5-2.4) |
+
+#### URI Encoding
+
+When request by value is used, the JAR is encoded as a URI before being returned to Mobile App, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). 
+No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
+
+#### SIOPv2 Authorization Request
+
+| Field                     | Description                                                                                  | Required | References                                                                                                                                                                                                               | Comments                                                  |
+| :------------------------ | :------------------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
+| `client_id`               | The DID of the Relying Party (the PFI). MUST match `client_id` of the JAR                    | y        |                                                                                                                                                                                                                          |                                                           |
+| `scope`                   | What's being requested. 'openid' indicates ID Token is being requested                       | y        | [OIDC Dynamic Client Registration](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest)                                                                                                                    |                                                           |
+| `response_type`           | What sort of response the RP is expecting. MUST include `id_token`. MAY include `vp_token`   | y        | [OIDC](https://openid.net/specs/openid-connect-core-1_0.html#Authentication)                                                                                                                                             |                                                           |
+| `response_uri`            | The URI to which the Mobile App should send the [SIOPv2 Authorization Response](#request-1)  | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-7.2)                                                                                                                            |                                                           |
+| `response_mode`           | The mode in which the SIOPv2 Authorization Response will be sent. MUST be `direct_post`      | y        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.2-1)                                                                                                                              |                                                           |
+| `presentation_definition` | Used by PFI to request VCs as input to IDV process                                           | n        | [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-presentation_definition-par)                                                                                                           | If present, Response Type `vp_token` MUST also be present |
+| `nonce`                   | A nonce which MUST be included in the ID Token provided in the SIOPv2 Authorization Response | y        |                                                                                                                                                                                                                          |                                                           |
+| `client_metadata`         | A [Client Metadata](#client-metadata) JSON object containing the Verifier metadata values    | y        | [OIDC Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html), [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-relying-party-client-metada) |                                                           |
 
 #### Client Metadata
+
 | Field                            | Description                                                                                                 | Required | References                                                                                              | Comments                         |
 | :------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------ | :------------------------------- |
 | `subject_syntax_types_supported` | Array of strings, each a DID method supported for the subject of ID Token                                   | y        | [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-7.5-2.1.1) | Example `["did:dht", "did:jwk"]` |
@@ -295,15 +313,26 @@ The response is a [SIOPv2 Authorization Request](https://openid.github.io/SIOPv2
 | `tos_uri`                        | URI that points to a terms of service document for the client                                               | n        | [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html#section-2)                                        |                                  |
 | `policy_uri`                     | URI that points to a privacy policy document                                                                | n        | [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html#section-2)                                        |                                  |
 
+#### Examples
+
+A non-normative example of a request by value response:
+```
+client_id=did:web:localhost%3A8891
+&request=eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDp3ZWI6bG9jYWxob3N0JTNBODg5MSMwIn0.eyJjbGllbnRfaWQiOiJkaWQ6d2ViOmxvY2FsaG9zdCUzQTg4OTEiLCJjbGllbnRfbWV0YWRhdGEiOnsic3ViamVjdF9zeW50YXhfdHlwZXNfc3VwcG9ydGVkIjpbImRpZDpkaHQiLCJkaWQ6andrIl0sImNsaWVudF9uYW1lIjoiRXhhbXBsZSBQRkkiLCJjbGllbnRfdXJpIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9wZmkvaW5mbyIsImxvZ29fdXJpIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9wZmkvbG9nby5wbmciLCJjb250YWN0cyI6WyJjb250YWN0QGV4YW1wbGUuY29tIl0sInRvc191cmkiOiJodHRwczovL2V4YW1wbGUuY29tL3BmaS90b3MiLCJwb2xpY3lfdXJpIjoiaHR0cHM6Ly9leGFtcGxlLmNvbS9wZmkvcG9saWN5In0sImlzcyI6ImRpZDp3ZWI6bG9jYWxob3N0JTNBODg5MSIsIm5vbmNlIjoiMjBmMmQ0ZjQ4YzcxYmNjMmEyZTVlMmY3MzkxNGNkNTMiLCJyZXNwb25zZV9tb2RlIjoiZGlyZWN0X3Bvc3QiLCJyZXNwb25zZV90eXBlIjoiaWRfdG9rZW4gdnBfdG9rZW4iLCJyZXNwb25zZV91cmkiOiJodHRwczovL2V4YW1wbGUuY29tL2tjYyIsInNjb3BlIjoib3BlbmlkIn0._T9VbDSSdbvk3AbMKPBQInn4oYP-HcTYMaZ0Vp5i6NdwTL-RXxFcMLdG1onVp1FBKU8mppDJfJhfDJwGjjTFCg
+```
+
+A non-normative example of a request by reference response:
+```
+client_id=https%3A%2F%2Fclient.example.org%2Fcb
+&request_uri=https%3A%2F%2Fclient.example.org%2Frequest%2FGkurKxf5T0Y-mnPFCHqWOMiZi4VS138cQO_V7PZHAdM
+
+```
+
 > [!IMPORTANT]
 > Include `vp_formats` in Client Metadata?  https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-9.1-2.2
 
 > [!IMPORTANT]
 > the inclusion of `presentation_definition` as per [OID4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#name-presentation_definition-par) allows for other verifiable credentials to be provided as input for IDV.
-
-#### URI Encoding
-
-The SIOPv2 Authorization Request is encoded as a URI before being returned to Mobile App, as per [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#section-5). No `authorization_endpoint` is used in the URI, so it is the query parameter portion of the URI only.
 
 ## Authenticate Applicant DID
 
@@ -312,7 +341,7 @@ The Mobile App responds with a [Cross-Device SIOPv2 Authorization Response](http
 ### Request 
 | Field                     | Description                                                                                                        | Required | References                                                                                                                                                     | Comments |
 | :------------------------ | :----------------------------------------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
-| `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Authorization Request                                       | y        | [JWT](https://www.rfc-editor.org/info/rfc7519) [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
+| `id_token`                | A self issued, signed JWT which responds to the SIOPv2 Authorization Request                                       | y        | [JWT](https://www.rfc-editor.org/info/rfc7519), [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html#name-self-issued-id-token) |          |
 | `vp_token`                | A Verifiable Presentation or an array of VPs in response to `presentation_definition`                              | n        | [OIDV4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.1-2.2)                                                                 |          |
 | `presentation_submission` | A Presentation Submission that contains mappings between the requested VC and where to find them within `vp_token` | n        | [OIDV4VP](https://openid.net/specs/openid-4-verifiable-presentations-1_0.html#section-6.1-2.4)                                                                 |          |
 
