@@ -231,17 +231,17 @@ end
 
 ## Discover Initiation Endpoint
 
-PFI's can become publicly discoverable by advertising their IDV endpoint as a [Service](https://www.w3.org/TR/did-core/#services) within their DID Document. In order to increase the likelihood of being discovered, the `service` entry **SHOULD** include the following properties:
+Credential issuance for PFI's *MUST* be publicly discoverable by conforming to [6.2.4 OpenID4 Verifiable Credential Issuance](https://www.w3.org/TR/did-spec-registries/#openid4-verifiable-credential-issuance). The Service entry *MUST* include the following properties:
 
-| Property          | Value                                                                                                                                                                                            |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`              | MUST be equal to the DID URI with an appended `idv` fragment, example `did:example:123#idv`, therefore the service MAY be [dereferenced](https://www.w3.org/TR/did-core/#did-url-dereferencing). |
-| `type`            | `IDV`                                                                                                                                                                                            |
-| `serviceEndpoint` | PFI's publicly addressable IDV endpoint for usage in [Initiate Application](#initiate-application).                                                                                              |
+| Property          | Value                                                                                                                                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | MUST be equal to the PFI's DID URI with an appended `oid4vci` fragment, example `did:example:123#oid4vci`, therefore the service MAY be [dereferenced](https://www.w3.org/TR/did-core/#did-url-dereferencing). |
+| `type`            | `OID4VCI`                                                                                                                                                                                                      |
+| `serviceEndpoint` | PFI's publicly addressable OID4VCI endpoint for usage in [Initiate Application](#initiate-application).                                                                                                        |
 
 > [!NOTE]
 >
-> _Decentralized_ discoverability is dependent upon whether the underlying [verifiable registry](https://www.w3.org/TR/did-core/#dfn-verifiable-data-registry) of the selected [DID Method](https://www.w3.org/TR/did-core/#methods) is crawlable
+> _Decentralized_ discoverability is dependent upon whether the underlying [verifiable registry](https://www.w3.org/TR/did-core/#dfn-verifiable-data-registry) of the selected [DID Method](https://www.w3.org/TR/did-core/#methods) is crawlable.
 
 ## Initiate Application
 
