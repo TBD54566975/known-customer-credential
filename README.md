@@ -19,6 +19,7 @@
     - [Web View](#web-view)
   - [Multiple Credential Types](#multiple-credential-types)
 - [Credential Application Flow](#credential-application-flow)
+  - [Discover Initiation Endpoint](#discover-initiation-endpoint)
   - [Initiate Application](#initiate-application)
     - [Request](#request)
     - [Response](#response)
@@ -228,6 +229,20 @@ rect rgba(0, 0, 0, 0.1)
 end
 ```
 
+## Discover Initiation Endpoint
+
+PFI's can become publicly discoverable by advertising their IDV endpoint as a [Service](https://www.w3.org/TR/did-core/#services) within their DID Document. In order to increase the likelihood of being discovered, the `service` entry **SHOULD** include the following properties:
+
+| Property          | Value                                                                                                                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`              | MUST be equal to the DID URI with an appended `idv` fragment, example `did:example:123#idv`, therefore the service MAY be [dereferenced](https://www.w3.org/TR/did-core/#did-url-dereferencing). |
+| `type`            | `IDV`                                                                                                                                                                                            |
+| `serviceEndpoint` | PFI's publicly addressable IDV endpoint for usage in [Initiate Application](#initiate-application).                                                                                              |
+
+> [!NOTE]
+>
+> _Decentralized_ discoverability is dependent upon whether the underlying [verifiable registry](https://www.w3.org/TR/did-core/#dfn-verifiable-data-registry) of the selected [DID Method](https://www.w3.org/TR/did-core/#methods) is crawlable
+
 ## Initiate Application
 
 The application flow is initiated with a [SIOPv2](https://openid.github.io/SIOPv2/openid-connect-self-issued-v2-wg-draft.html) interaction that authenticates the applicant's DID.
@@ -251,7 +266,7 @@ D->>D: Verify IDV Request
 D->>W: Load URL in IDV Request
 ```
 
-1. Mobile App resolves the PFI's DID and sends an HTTP GET Request to the `serviceEndpoint` of the first `IDV` service found in the resolved DID Document
+1. Mobile App sends an HTTP GET request to the `serviceEndpoint` specified in [Discover Initiation Endpoint](#discover-initiation-endpoint)
 2. PFI constructs a [SIOPv2 Authorization Request](#response)
 3. PFI URI-encodes SIOPv2 Authorization Request and returns in HTTP response
 4. Mobile App verifies integrity of SIOPv2 Authorization Request and constructs a [SIOPv2 Authorization Response](#request-1)
