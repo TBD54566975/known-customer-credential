@@ -7,16 +7,20 @@
       "properties":{
         "id":{
           "type":"string",
-          "pattern":"^did:[a-z0-9]+:[a-zA-Z0-9.-_:]+$"
+          "pattern":"^did:[a-z0-9]+:([a-zA-Z0-9.-_:]|%[0-9A-Fa-f]{2})+$"
         }
       },
       "required":[
         "id"
       ]
     },
+    "id":{
+      "type":"string",
+      "format":"uri"
+    },
     "issuer":{
       "type":"string",
-      "pattern":"^did:[a-z0-9]+:[a-zA-Z0-9.-_:]+$"
+      "pattern":"^did:[a-z0-9]+:([a-zA-Z0-9.-_:]|%[0-9A-Fa-f]{2})+$"
     },
     "issuanceDate":{
       "type":"string",
@@ -27,25 +31,29 @@
       "format":"date-time"
     },
     "credentialSchema":{
-      "type":"object",
-      "properties":{
-        "id":{
-          "type":"string",
-          "format":"uri"
+      "type":"array",
+      "items":{
+        "type":"object",
+        "properties":{
+          "id":{
+            "type":"string",
+            "format":"uri"
+          },
+          "type":{
+            "type":"string",
+            "const":"JsonSchema"
+          }
         },
-        "type":{
-          "type":"string",
-          "const":"JsonSchema"
-        }
-      },
-      "required":[
-        "id",
-        "type"
-      ]
+        "required":[
+          "id",
+          "type"
+        ]
+      }
     }
   },
   "required":[
     "credentialSubject",
+    "id",
     "issuer",
     "issuanceDate",
     "expirationDate",
