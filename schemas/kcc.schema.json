@@ -15,6 +15,15 @@
             },
             "tier":{
                "type":"string"
+            },
+            "jurisdiction":{
+               "type":"object",
+               "properties":{
+                  "country": {
+                     "type":"string",
+                     "pattern":"^[A-Z]{2}$"
+                  }
+               }
             }
          },
          "required":[
