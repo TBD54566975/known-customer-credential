@@ -47,6 +47,7 @@
         - [`access_token` JOSE Header](#access_token-jose-header)
         - [`access_token` Claims](#access_token-claims)
       - [Token Error Response](#token-error-response)
+        - [Error Codes](#error-codes)
     - [Credential Endpoint](#credential-endpoint)
       - [Credential Request](#credential-request)
         - [`proof`](#proof)
