@@ -572,11 +572,11 @@ The `access_token` granted by the Credential Issuer contains the following [JWT 
 
 The authorization server responds with an HTTP 400 (Bad Request), and an error object in the response body.
 
-| Field                | Description                                                | Required | References                                                            | Comments |
-|: ------------------- |: --------------------------------------------------------- | :------- |: -------------------------------------------------------------------- |: ------- |
-| `error`              | A string error code from below list                        | y        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2)  |          |
-| `error_description`  | A human-readable description of the error                  | n        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2)  |          |
-| `error_uri`          | A URI that provides additional information about the error | n        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2)  |          |
+| Field               | Description                                                | Required | References                                                           | Comments |
+| :------------------ | :--------------------------------------------------------- | :------- | :------------------------------------------------------------------- | :------- |
+| `error`             | A string error code from below list                        | y        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2) |          |
+| `error_description` | A human-readable description of the error                  | n        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2) |          |
+| `error_uri`         | A URI that provides additional information about the error | n        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2) |          |
 
 ##### Error Codes
 - `invalid_request`
