@@ -36,22 +36,24 @@
     - [IDV Vendor Collects PII](#idv-vendor-collects-pii)
     - [PFI collects PII](#pfi-collects-pii)
   - [Credential Issuance](#credential-issuance)
-    - [1. Metadata Endpoints](#1-metadata-endpoints)
+    - [Metadata Endpoints](#metadata-endpoints)
       - [Well Known Endpoints](#well-known-endpoints)
       - [Credential Issuer Metadata](#credential-issuer-metadata)
         - [`credential_configurations_supported`](#credential_configurations_supported)
       - [Authorization Server Metadata](#authorization-server-metadata)
-    - [2. Authorization Endpoints](#2-authorization-endpoints)
+    - [Token Endpoint](#token-endpoint)
       - [Token Request](#token-request)
-      - [Token Response](#token-response)
+      - [Successful Token Response](#successful-token-response)
         - [`access_token` JOSE Header](#access_token-jose-header)
         - [`access_token` Claims](#access_token-claims)
-    - [3. Issuance Endpoints](#3-issuance-endpoints)
+      - [Token Error Response](#token-error-response)
+    - [Credential Endpoint](#credential-endpoint)
       - [Credential Request](#credential-request)
         - [`proof`](#proof)
           - [`proof.jwt` JOSE Headers](#proofjwt-jose-headers)
           - [`proof.jwt` Claims](#proofjwt-claims)
       - [Credential Response](#credential-response)
+    - [Deferred Credential Endpoint](#deferred-credential-endpoint)
       - [Deferred Credential Request](#deferred-credential-request)
       - [Deferred Credential Response](#deferred-credential-response)
 - [Other Considerations](#other-considerations)
@@ -423,8 +425,7 @@ W->>W: Close
 
 ## Credential Issuance
 
-Credential Issuance is an [OID4VCI Pre-Authorized Code flow](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#name-pre-authorized-code-flow). 
-The `pre-authorized_code` from the IDV Request can be exchanged for an Access Token via the Token Endpoint.  
+Credential Issuance is an [OID4VCI Pre-Authorized Code flow](https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html#name-pre-authorized-code-flow):
 
 ```mermaid
 sequenceDiagram
@@ -433,17 +434,28 @@ autonumber
 participant D as Mobile App
 participant P as PFI
 
-D->>+P: Fetch metadata
-P-->>-D: Metadata
-D->>+P: Request authorization
-P-->>-D: Authorize
+D->>+P: GET Authorization metadata
+P-->>-D: Authorization Server metadata
+D->>+P: Token Endpoint
+P-->>-D: Access Token
+D->>+P: GET Credential metadata
+P-->>-D: Credential Issuer metadata
 D->>+P: Issue credential
 P-->>-D: Credential
 ```
 
-### 1. Metadata Endpoints
+1. GET well-known oauth-authorization-server endpoint
+2. PFI returns [Authorization Server Metadata](#authorization-server-metadata)
+3. Token Request containing `pre-authorized_code` 
+4. Token Response containing an Access Token
+5. GET well-known openid-credential-issuer endpoint
+6. PFI returns [Credential Issuer Metadata](#credential-issuer-metadata)
+7. Request credentials
+8. PFI issues credential 
 
-Metadata resources are hosted by the Credential Issuer as a means of informing client's of endpoint locations, technical capabilities, feature support and (internationalized) display information.
+### Metadata Endpoints
+
+Metadata resources are hosted by the Credential Issuer as a means of informing clients of endpoint locations, technical capabilities, feature support and (internationalized) display information.
 
 #### Well Known Endpoints
 
@@ -454,7 +466,7 @@ URLs to retrieve both [Credential Issuer Metadata](#credential-issuer-metadata) 
 - [Credential Issuer Metadata](#credential-issuer-metadata) URL: `credential_issuer` + `/.well-known/openid-credential-issuer`
 - [Authorization Server Metadata](#authorization-server-metadata) URL: `credential_issuer` + `/.well-known/oauth-authorization-server`
 
-Where `credential_issuer` originates from within the [Credential Offer](#credential-offer) from within the [IDV Request](#idv-request)
+Where `credential_issuer` originates from within the [Credential Offer](#credential-offer) from within the [IDV Request](#idv-request).
 
 #### Credential Issuer Metadata
 
@@ -491,13 +503,15 @@ The Credential Issuer's Authorization Server Metadata informs clients of its end
 > [!WARNING]
 > TODO we need to consider additional fields, such as `authorization_endpoint` (once we support the Auth Flow) or `response_types_supported`
 
-### 2. Authorization Endpoints
+### Token Endpoint
 
-Clients must authorize with the Credential Issuer prior-to interfacing with the [Issuance Endpoints](#3-issuance-endpoints) as a means of authorizing the Credential Issuer access to the client resources created during the [IDV](#idv) phase.
+The Token Endpoint issues an Access Token in exchange for the `pre-authorized_code` from the [Credential Offer](#credential-offer).
+The `pre-authorized_code` must be invalidated immediately upon issue of an Access Token. 
+The Access Token can be used with the [Credential Endpoint](#credential-endpoint) and [Deferred Credential Endpoint](#deferred-credential-endpoint).
+
+The URL of the Token Endpoint is available in the `token_endpoint` field of the [Authorization Server Metadata](#authorization-server-metadata).
 
 #### Token Request
-
-Clients must request an access token in order to interface with the [3. Issuance Endpoints](#3-issuance-endpoints).
 
 | Field                 | Description                                                                       | Required | References                                                                                                                 | Comments                                                       |
 | :-------------------- | :-------------------------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
@@ -510,9 +524,9 @@ Clients must request an access token in order to interface with the [3. Issuance
 > [!WARNING]
 > TODO we only support pre-auth flow now, but once we support auth flow then `code` will be used instead of `pre-authorized_code`
 
-#### Token Response
+#### Successful Token Response
 
-Clients must use the fields from token response in subsequent calls to the [3. Issuance Endpoints](#3-issuance-endpoints).
+Clients must use the fields from token response in subsequent calls to the [Credential Endpoint](#credential-endpoint) and [Deferred Credential Endpoint](#deferred-credential-endpoint).
 
 | Field                | Description                                                                          | Required | References                                                                                           | Comments                                                                                                    |
 | :------------------- | :----------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
@@ -523,14 +537,6 @@ Clients must use the fields from token response in subsequent calls to the [3. I
 | `c_nonce_expires_in` | Seconds from issue until the `c_nonce` expires                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.2) |                                                                                                             |
 
 Additionally the token response MUST contain HTTP headers "Cache-Control: no-store" and "Pragma: no-cache" as per [RC6749](https://www.rfc-editor.org/rfc/rfc6749.html#section-5.1)
-
-
-> [!WARNING]
-> TODO we need to define error responses https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2.1
-> 
-> TODO including `authorization_pending` https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-token-error-response
-> 
->     the `authorization_pending` occurs here, and is approved by 
 
 > [!WARNING]
 > TODO we need to define refresh token flows
@@ -561,9 +567,26 @@ The `access_token` granted by the Credential Issuer contains the following [JWT 
 | `c_nonce`        | A nonce to be used in the [Proof JWT](#proofjwt-claims)              | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |          |
 | `c_nonce_expiry` | Expiry time of the c_nonce                                           | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.2-4.1) |          |
 
-### 3. Issuance Endpoints
+#### Token Error Response
 
-Clients interface with the following endpoints as a means of acquiring the credential.
+The authorization server responds with an HTTP 400 (Bad Request), and an error object in the response body.
+
+| Field                | Description                                                | Required | References                                                            | Comments |
+|: ------------------- |: --------------------------------------------------------- | :------- |: -------------------------------------------------------------------- |: ------- |
+| `error`              | A string error code from below list                        | y        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2)  |          |
+| `error_description`  | A human-readable description of the error                  | n        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2)  |          |
+| `error_uri`          | A URI that provides additional information about the error | n        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2)  |          |
+
+##### Error Codes
+- `invalid_request`
+- `invalid_grant`
+- `invalid_client`
+- `unauthorized_client`
+- `unsupported_grant_type`
+
+### Credential Endpoint
+
+Clients interface with the Credential Endpoint as a means of acquiring the credential.
 
 ```mermaid
 sequenceDiagram
@@ -573,18 +596,17 @@ participant D as Mobile App
 participant P as PFI
 participant V as IDV Vendor
 
-D->>+P: Credentials Request
-P->>-D: txn_id
+D->>+P: Credential Request
+P->>-D: transaction_id
 
 loop until credential received
-    D->>+P: Deferred Cred Request
+    D->>+P: Deferred Credential Request
     P->>-D: issuance_pending
 end
 V->>+P: Webhook Request w. results
-P->>P: evaluate results and Issue Credential or Reject
+P->>P: Evaluate results and Issue Credential or Reject
 D->>P: Deferred Credential Request
 P->>D: Credential Response w/ Credential
-P->>-P: Invalidate preauth code
 ```
 
 #### Credential Request
@@ -630,7 +652,10 @@ For the client to prove possession of their cryptographic materials, they must c
 
 #### Credential Response
 
-The Credential Issuer will respond to a [Credential Request](#credential-request) with either the credential (in `jwt_vc_json` format) given the Credential Issuer is ready to issue, whereafter the credential may be used for the purpose of providing financial services to that DID in accordance to regulatory requirements, else, given the Credential Issuer is not ready to issue the credential, they must respond with a `transaction_id` which is to be used in a subsequent call in the [Deferred Credential Request](#deferred-credential-request).
+Credential Response can be immediate or deferred. If the issuer can immediately issue the requested credential, it will
+return it in the `credential` field.
+
+If the issuer cannot immediately issue a credential it returns a `transaction_id`, which is to be used in a subsequent call in the [Deferred Credential Request](#deferred-credential-request).
 
 | Field            | Description                                                                                | Required | References                                                                                           | Comments                                      |
 | :--------------- | :----------------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------- |
@@ -639,6 +664,8 @@ The Credential Issuer will respond to a [Credential Request](#credential-request
 
 > [!WARNING]
 > TODO we need to define the c_nonce stuff for the deferred flow; right now `proof` is embedded under the Credential Request, but it's applicable against the deferred and batch credential requests
+
+### Deferred Credential Endpoint
 
 #### Deferred Credential Request
 
