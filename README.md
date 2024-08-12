@@ -473,11 +473,12 @@ Where `credential_issuer` originates from within the [Credential Offer](#credent
 
 The Credential Issuer Metadata informs clients of endpoint locations, technical capabilities, supported Credentials, and (internationalized) display information.
 
-| Field                                                                         | Description                                                        | Required | References                                                                                              | Comments                                                                               |
-| :---------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------- |
-| `credential_issuer`                                                           | URL of the Credential Issuer                                       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.1) | Same value as the `credential_issuer` within the [Credential Offer](#credential-offer) |
-| `credential_endpoint`                                                         | URL for the [Credential Endpoint](#credential-endpoint)            | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.3) |                                                                                        |
-| [`credential_configurations_supported`](#credential_configurations_supported) | Object which defines the specifics of the credentials being issued | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.3) |                                                                                        |
+| Field                                 | Description                                                               | Required | References                                                                                              | Comments                                                                               |
+| :------------------------------------ |:--------------------------------------------------------------------------| :------- | :------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------- |
+| `credential_issuer`                   | URL of the Credential Issuer                                              | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.1) | Same value as the `credential_issuer` within the [Credential Offer](#credential-offer) |
+| `credential_endpoint`                 | URL for the [Credential Endpoint](#credential-endpoint)                   | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.3) |                                                                                        |
+| `deferred_credential_endpoint`        | URL for the [Deferred Credential Endpoint](#deferred-credential-endpoint) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.5) |                                                                                        |
+| `credential_configurations_supported` | Object which defines the specifics of the credentials being issued        | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-11.2.3-2.3) |                                                                                        |
 
 ##### `credential_configurations_supported`
 
@@ -587,7 +588,8 @@ The authorization server responds with an HTTP 400 (Bad Request), and an error o
 
 ### Credential Endpoint
 
-Clients interface with the Credential Endpoint as a means of acquiring the credential.
+This endpoint issues a Credential (or a Transaction ID) upon presentation of a valid Access Token.
+The URL is the `credential_endpoint` field of the [Credential Issuer Metadata](#credential-issuer-metadata).
 
 ```mermaid
 sequenceDiagram
@@ -611,8 +613,6 @@ P->>D: Credential Response w/ Credential
 ```
 
 #### Credential Request
-
-Clients use the Credential Request to request a credential.
 
 The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Authorization: Bearer {access_token}`)
 
@@ -644,37 +644,67 @@ For the client to prove possession of their cryptographic materials, they must c
 
 For the client to prove possession of their cryptographic materials, they must construct a JWT with the following [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) fields.
 
-| Field   | Description                                                           | Required | References                                                                                                   | Comments |
-| :------ | :-------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------- | :------- |
-| `iss`   | (Issuer) The DID of the customer applying for KCC (Applicant DID)     | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.1) |          |
-| `aud`   | (Audience) The DID of the Credential Issuer                           | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.2) |          |
-| `iat`   | (IssuedAt) The time at which the key proof was created                | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.3) |          |
-| `nonce` | The value of the `c_nonce` from the [Token Response](#token-response) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.4) |          |
+| Field   | Description                                                                      | Required | References                                                                                                   | Comments |
+| :------ | :------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------- | :------- |
+| `iss`   | (Issuer) The DID of the customer applying for KCC (Applicant DID)                | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.1) |          |
+| `aud`   | (Audience) The DID of the Credential Issuer                                      | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.2) |          |
+| `iat`   | (IssuedAt) The time at which the key proof was created                           | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.3) |          |
+| `nonce` | The value of the `c_nonce` from the [Token Response](#successful-token-response) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.2.1.1-2.2.2.4) |          |
 
 #### Credential Response
 
 Credential Response can be immediate or deferred. If the issuer can immediately issue the requested credential, it will
-return it in the `credential` field.
+return it in the `credential` field, with an HTTP 200 (OK) status code. 
 
-If the issuer cannot immediately issue a credential it returns a `transaction_id`, which is to be used in a subsequent call in the [Deferred Credential Request](#deferred-credential-request).
+If the issuer cannot immediately issue a credential it returns a `transaction_id`, which is to be used in a subsequent call 
+in the [Deferred Credential Request](#deferred-credential-request). The HTTP status code MUST be 202 (Accepted).
 
 | Field            | Description                                                                                | Required | References                                                                                           | Comments                                      |
 | :--------------- | :----------------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :-------------------------------------------- |
 | `credential`     | The credential in `jwt_vc_json` format                                                     | n        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3-6.1) | If missing, `transaction_id` must be present  |
 | `transaction_id` | ID used for subsequent call to [Deferred Credential Request](#deferred-credential-request) | n        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3-6.2) | If missing, then `credential` must be present |
 
-> [!WARNING]
-> TODO we need to define the c_nonce stuff for the deferred flow; right now `proof` is embedded under the Credential Request, but it's applicable against the deferred and batch credential requests
+#### Credential Error Response
+
+##### Authorization Errors
+
+If the Credential Request does not contain a valid Access Token, the response is an authorization error response, as per [RFC6750](https://www.rfc-editor.org/rfc/rfc6750.html#section-3).
+
+#### Credential Request Errors
+
+| Field               | Description                                                | Required | References                                                                                                 | Comments |
+| :------------------ | :---------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------------- | :------- |
+| `error`             | A string error code from below list       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3.1.2-3.1.1) |          |
+| `error_description` | A human-readable description of the error | n        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3.1.2-3.2)   |          |
+
+Error codes are defined by [OID4VCI Credential Request Errors](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3.1.2-3.1.1)
 
 ### Deferred Credential Endpoint
 
+This endpoint issues a credential previously requested via the [Credential Endpoint](#credential-endpoint), in cases where
+the credential issuer was not able to immediately issue the credential. 
+The URL is the `deferred_credential_endpoint` field of the [Credential Issuer Metadata](#credential-issuer-metadata).
+
 #### Deferred Credential Request
 
-TODO
+The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Authorization: Bearer {access_token}`).
 
-#### Deferred Credential Response
+| Field            | Description                                                                | Required | References                                                                                                            | Comments |
+| :--------------- | :------------------------------------------------------------------------- | :------- | :-------------------------------------------------------------------------------------------------------------------- | :------- |
+| `transaction_id` | Transaction ID returned by the [Credential Response](#credential-response) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-request) |          |
 
-TODO
+#### Successful Deferred Credential Response
+
+| Field            | Description                                                                                | Required | References                                                                                           | Comments |
+| :--------------- | :----------------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :------- |
+| `credential`     | The credential in `jwt_vc_json` format                                                     | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-9.1-3.1) |          |
+
+#### Deferred Credential Error Response
+
+When the Deferred Credential Request is invalid or the credential is not available yet, the response is an HTTP 400 (Bad Request), 
+and an error object in the response body.
+
+Response body is defined in [Credential Error Response](#credential-error-response)
 
 # Other Considerations
 
