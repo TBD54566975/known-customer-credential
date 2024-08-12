@@ -54,9 +54,13 @@
           - [`proof.jwt` JOSE Headers](#proofjwt-jose-headers)
           - [`proof.jwt` Claims](#proofjwt-claims)
       - [Credential Response](#credential-response)
+      - [Credential Error Response](#credential-error-response)
+        - [Authorization Errors](#authorization-errors)
+      - [Credential Request Errors](#credential-request-errors)
     - [Deferred Credential Endpoint](#deferred-credential-endpoint)
       - [Deferred Credential Request](#deferred-credential-request)
-      - [Deferred Credential Response](#deferred-credential-response)
+      - [Successful Deferred Credential Response](#successful-deferred-credential-response)
+      - [Deferred Credential Error Response](#deferred-credential-error-response)
 - [Other Considerations](#other-considerations)
 <!-- TOC -->
 
@@ -511,7 +515,7 @@ The Token Endpoint issues an Access Token in exchange for the `pre-authorized_co
 The `pre-authorized_code` must be invalidated immediately upon issue of an Access Token. 
 The Access Token can be used with the [Credential Endpoint](#credential-endpoint) and [Deferred Credential Endpoint](#deferred-credential-endpoint).
 
-The URL of the Token Endpoint is available in the `token_endpoint` field of the [Authorization Server Metadata](#authorization-server-metadata).
+The URL is the `token_endpoint` field of the [Authorization Server Metadata](#authorization-server-metadata).
 
 #### Token Request
 
@@ -672,7 +676,7 @@ If the Credential Request does not contain a valid Access Token, the response is
 
 #### Credential Request Errors
 
-| Field               | Description                                                | Required | References                                                                                                 | Comments |
+| Field               | Description                               | Required | References                                                                                                 | Comments |
 | :------------------ | :---------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------------- | :------- |
 | `error`             | A string error code from below list       | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3.1.2-3.1.1) |          |
 | `error_description` | A human-readable description of the error | n        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3.1.2-3.2)   |          |
@@ -695,9 +699,9 @@ The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Autho
 
 #### Successful Deferred Credential Response
 
-| Field            | Description                                                                                | Required | References                                                                                           | Comments |
-| :--------------- | :----------------------------------------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :------- |
-| `credential`     | The credential in `jwt_vc_json` format                                                     | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-9.1-3.1) |          |
+| Field        | Description                            | Required | References                                                                                           | Comments |
+| :----------- | :------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :------- |
+| `credential` | The credential in `jwt_vc_json` format | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-9.1-3.1) |          |
 
 #### Deferred Credential Error Response
 
