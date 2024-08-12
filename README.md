@@ -584,6 +584,9 @@ The authorization server responds with an HTTP 400 (Bad Request), and an error o
 | `error_uri`         | A URI that provides additional information about the error | n        | [RFC6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.2) |          |
 
 ##### Error Codes
+
+Error codes are defined in [OID4VCI Token Error Response](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-6.3).
+
 - `invalid_request`
 - `invalid_grant`
 - `invalid_client`
@@ -697,7 +700,7 @@ The `access_token` must be passed as an HTTP `Authorization` header (i.e. `Autho
 | :--------------- | :------------------------------------------------------------------------- | :------- | :-------------------------------------------------------------------------------------------------------------------- | :------- |
 | `transaction_id` | Transaction ID returned by the [Credential Response](#credential-response) | y        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-deferred-credential-request) |          |
 
-#### Successful Deferred Credential Response
+#### Deferred Credential Response
 
 | Field        | Description                            | Required | References                                                                                           | Comments |
 | :----------- | :------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------- | :------- |
