@@ -59,7 +59,7 @@
       - [Credential Request Errors](#credential-request-errors)
     - [Deferred Credential Endpoint](#deferred-credential-endpoint)
       - [Deferred Credential Request](#deferred-credential-request)
-      - [Successful Deferred Credential Response](#successful-deferred-credential-response)
+      - [Deferred Credential Response](#deferred-credential-response)
       - [Deferred Credential Error Response](#deferred-credential-error-response)
 - [Other Considerations](#other-considerations)
 <!-- TOC -->
