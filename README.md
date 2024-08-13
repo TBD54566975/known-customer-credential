@@ -606,17 +606,21 @@ participant D as Mobile App
 participant P as PFI
 participant V as IDV Vendor
 
-D->>+P: Credential Request
-P->>-D: transaction_id
-
-loop until credential received
+alt Immediate Issuance
+  D->>+P: Credential Request
+  P->>-D: Issued Credential
+else Deferred Issuance
+  D->>+P: Credential Request
+  P->>-D: transaction_id
+  loop until credential received
     D->>+P: Deferred Credential Request
     P->>-D: issuance_pending
-end
-V->>+P: Webhook Request w. results
-P->>P: Evaluate results and Issue Credential or Reject
-D->>P: Deferred Credential Request
-P->>D: Credential Response w/ Credential
+  end
+  V->>+P: Webhook Request w. results
+  P->>P: Evaluate results and Issue Credential or Reject
+  D->>+P: Deferred Credential Request
+  P->>-D: Issued Credential
+end 
 ```
 
 #### Credential Request
@@ -685,6 +689,11 @@ If the Credential Request does not contain a valid Access Token, the response is
 | `error_description` | A human-readable description of the error | n        | [OID4VCI](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3.1.2-3.2)   |          |
 
 Error codes are defined by [OID4VCI Credential Request Errors](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#section-7.3.1.2-3.1.1)
+- `invalid_credential_request`
+- `unsupported_credential_type`
+- `invalid_proof`
+- `invalid_encryption_parameters`
+- `invalid_request`
 
 ### Deferred Credential Endpoint
 
