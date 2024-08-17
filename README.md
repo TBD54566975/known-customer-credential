@@ -70,10 +70,10 @@ This document proposes a standardized means for PFIs (Participating Financial In
 
 ## Known Customer Credential
 
-KCC (Known Customer Credential) is a [VC (Verifiable Credential)](https://www.w3.org/TR/vc-data-model-2.0/) which is intended to be utilized by a retail customer as proof of an actively compliant KYC verification.
+KCC (Known Customer Credential) is a [VC (Verifiable Credential)](https://www.w3.org/TR/vc-data-model/) which is intended to be utilized by a retail customer as proof of an actively compliant KYC verification.
 
 ## Known Customer Credential Schema
-The json schema for the KCC can be found here: [KCC Schema](kcc-schema.json). This schema defines the structure and requirements for a Known Customer Credential, ensuring all necessary information is included and correctly formatted.
+A non-normative [example JSON schema](/schemas/kcc.schema.json) for a KCC is provided. PFIs may use any VC schema they desire, so long as they comply with the VC Data Model.
 
 ## Know Your Customer Background
 In the financial industry, KYC (Know Your Customer) is term used to describe a set of policies, procedures, and processes that financial institutions use to determine the true identity of a customer, and assess the on-going risk that a customer poses to an organization during the life-time of a customer relationship. KYC typically encompasses:
